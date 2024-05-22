@@ -44,6 +44,7 @@ export const AddNewContactPopup = ()=>{
         if(!self){
             const res = await axios.post(socketurl+"/addfriend" , {
                 sender : session?.user.email,
+                senderId : session?.user.id,
                 receiver
             })
             // socket.emit("JOIN_ROOM" , {

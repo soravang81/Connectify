@@ -10,13 +10,39 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Users{
-  id Int @id @default(autoincrement())
-  email String @unique
-  password String
-  username String
-  friends String[]
-  pfp String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+model Users {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  password    String
+  username    String        @unique  
+  friends     String[]
+  pfp         String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  requests    Requests[]
+  userrequests UserRequests[]
 }
+
+model Requests {
+  id          Int           @id @default(autoincrement())
+  senderId     Int          @unique
+  receiverId   Int          @unique         
+  status       RequestStatus
+  createdAt   DateTime      @default(now())
+  acceptedAt  DateTime?
+  user         Users          @relation(fields: [senderId], references: [id]) 
+  userrequests UserRequests[]
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+ model UserRequests {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  requestId    Int
+  user          Users @relation(fields: [userId], references: [id])
+  requests      Requests      @relation(fields: [requestId], references: [receiverId])
+ }

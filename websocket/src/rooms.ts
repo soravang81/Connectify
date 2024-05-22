@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { io } from ".";
+import { io } from "./server";
 import { v4 }  from "uuid";
 
 export interface dataprop{
@@ -16,8 +16,9 @@ export const messageHandler = ( socket: Socket ,data :dataprop |string ): void =
   };
   
 export const joinRoomHandler = ( socket: Socket ,data :dataprop ): void => {
-  if(data.room){
-    socket.join(data.room);
+  if(data){
+    const roomId = v4();
+    socket.join(roomId)
   }
   console.log("User joined room:", data.room);
 };

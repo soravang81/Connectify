@@ -1,86 +1,38 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import dotenv from 'dotenv';
-import { createClient } from 'redis';
-import { dataprop, joinRoomHandler, messageHandler } from './rooms';
-import prisma from '../db/db';
-import cors from "cors"
-// import prisma from '../db/db';
-// import { handleEvent } from './rooms';
+import prisma from "../db/db";
+import { app, io, startServer, url } from "./server";
+import { SocketConnections } from "./socket";
 
-dotenv.config(); 
+// start the server
+const start = async () => {
+  await startServer();
+  SocketConnections();
+}
 
-const app = express();
-const redis = createClient();
-const httpServer = createServer(app);
-app.use(express.json())
-app.use(cors())
+start();
 
-const url = process.env.FRONTEND_URL;
-const port = process.env.SOCKET_PORT || 8080;
-console.log(url)
-export const io = new Server(httpServer, {
-  cors: {
-    origin: url || "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-  },
-});
+//routes  
+
 
 app.get("/", (req, res) => {
   res.send("hello world");
   console.log(`Frontend URL: ${url}`);
 });
 
-async function startServer() {
-  try {
-    await redis.connect();
-    console.log("Connected to Redis");
-
-    httpServer.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-    
-  } catch (error) {
-      console.error("Failed to connect to Redis", error);
-  }
-}
-
-startServer();
-
-//socket connection
-
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-  // io.sockets.sockets.forEach((socket) => {
-  //   socket.disconnect(true); // Send a disconnect message to the client
-  // });
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-  socket.on('message', (data : dataprop) => messageHandler(socket, data));
-  socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
-  
-});
-
-//routes
 
 app.post("/addfriend" , async(req, res) => {
-  const {sender , receiver} = req.body;
-
+  const {sender ,senderId , receiver} = req.body;
+//if user send self request
   if(sender === receiver){
-    return res.json({
+    return res.status(400).json({
       msg : "self"
     })
-    // return res.json(false)
   }
-  try{ 
+  try{ //check if the receiver exist or not
     const friend = await prisma.users.findFirst({
       where : {
         email : receiver
       }
-    })
+    }) //if receiver exists , check if he already a friend of sender
     if(friend){
       const exists = await prisma.users.findFirst({
         where : {
@@ -92,43 +44,46 @@ app.post("/addfriend" , async(req, res) => {
       })
       console.log(exists)
       if(exists){
-        return res.json({
+        return res.status(200).json({
           msg : "added"
         })
       }
-      else {
-        const user = await prisma.users.update({
-          data : {
-            friends : {
-              push : friend.username
+      else {// if is not an friend already , send the request successfully
+        try{
+          const requestdetails = await prisma.requests.create({
+            data : {
+              senderId : senderId,
+              receiverId : friend.id,
+              status : "PENDING"
             }
-          },
-          where : {
-            email : sender
-          }
-        })
-        if(user){
-          return res.json({
+          })
+          io.on("event" , ()=>{
+            console.log("sdf")
+          })
+          return res.status(201).json({
             msg : "sent"
           })
         }
-        else{
-          return res.json(false)
+        catch{
+          console.log("request details not saved")
+          return res.status(202).json({
+            msg : "notsent"
+          })
         }
       }
     }
-    else{
-      return res.json(false)
+    else{// receiver does not exists
+      return res.status(200).json(false)
     }
   }
   catch(e){
     console.log(e)
-    return res.json({
+    return res.status(500).json({
       error  : e
     })
   }
 })
-app.post("/getfriend" , async (req , res)=>{
+app.post("/getrequest" , async (req , res)=>{
   const { email } = req.body
   try{
     const resp = await prisma.users.findMany({

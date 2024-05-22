@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { signIn } from "next-auth/react";
-import { credentialsSchema } from "@/src/utils/zod/schema";
+import { SignupSchema } from "@/src/utils/zod/schema";
 
 
 
@@ -19,7 +19,7 @@ export default function SignupComp() {
   const handleClick = async (e:FormEvent) => {
     e.preventDefault()
     try {
-      const parsedData = credentialsSchema.safeParse({
+      const parsedData = SignupSchema.safeParse({
         email,
         username,
         password,
