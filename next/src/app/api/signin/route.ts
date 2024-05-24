@@ -15,9 +15,9 @@ export async function POST(req:NextRequest) {
     })
     if(res){
         // console.log("succeed")
-        NextResponse.json(res);
+        return NextResponse.json(res);
     }
     else{
-        NextResponse.json(false)
+        return NextResponse.json(false)
     }
 }

@@ -25,12 +25,12 @@ model Users {
 
 model Requests {
   id          Int           @id @default(autoincrement())
-  senderId     Int          @unique
-  receiverId   Int          @unique         
-  status       RequestStatus
+  senderId     Int          
+  receiverId   Int                   
+  status       RequestStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   acceptedAt  DateTime?
-  user         Users          @relation(fields: [senderId], references: [id]) 
+  user         Users        @relation(fields: [senderId], references: [id]) 
   userrequests UserRequests[]
 }
 
@@ -40,9 +40,9 @@ enum RequestStatus {
   REJECTED
 }
  model UserRequests {
-  id           Int           @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   userId       Int
   requestId    Int
-  user          Users @relation(fields: [userId], references: [id])
-  requests      Requests      @relation(fields: [requestId], references: [receiverId])
+  user          Users         @relation(fields: [userId], references: [id])
+  requests      Requests      @relation(fields: [requestId], references: [id])
  }

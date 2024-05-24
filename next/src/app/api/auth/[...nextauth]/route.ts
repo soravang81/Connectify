@@ -38,7 +38,7 @@ const handler = NextAuth({
                     }) as userr | false;
                     if (user) {
                         const res = user.data
-                        return res as User | null;
+                        return user as User | null;
                     } else {
                         return null;
                     }

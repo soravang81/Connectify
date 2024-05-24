@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { RecoilState, useRecoilState, useSetRecoilState } from "recoil";
 import { socketState } from "../recoil/state";
 import { Socket, io } from "socket.io-client";
-import { socket } from "@/src/socket";
+import { socket } from "./io";
 
 const socketurl = process.env.SOCKET_URL || "http://localhost:8080";
 
