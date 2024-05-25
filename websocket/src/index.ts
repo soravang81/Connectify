@@ -1,7 +1,7 @@
 import prisma from "../db/db";
 import { app, io, startServer, url } from "./server";
 import { SocketConnections } from "./socket";
-import { Sockets, userSocket } from "./userssocket";
+import { Sockets, userSocket } from "./user-socket";
 
 // start the server
 const start = async () => {
@@ -13,11 +13,9 @@ start();
 
 //routes  
 io.use((socket, next) => {
-  const userId = socket.handshake.query.userId;
-  console.log("user id : ",userId);
-  console.log("socket id : ",socket.id);
-  if(typeof userId === "string" ){
-    userSocket(userId,socket.id)
+  const userEmail = socket.handshake.query.userEmail;
+  if(typeof userEmail === "string" ){
+    userSocket(userEmail,socket.id)
     console.log(Sockets)
   }
   next();
@@ -31,6 +29,7 @@ app.get("/", (req, res) => {
 
 app.post("/addfriend" , async(req, res) => {
   const {sender ,senderId , receiver ,roomId} = req.body;
+  const senderid = parseInt(senderId)
 //if user send self request
   if(sender === receiver){
     return res.status(400).json({
@@ -46,9 +45,11 @@ app.post("/addfriend" , async(req, res) => {
     if(friend){
       const exists = await prisma.users.findFirst({
         where : {
-          email : sender,
-          friends : {
-            has : friend.username
+          AND : {
+            email : sender,
+            friends : {
+              has : friend.username
+            }
           }
         }
       })
@@ -56,11 +57,27 @@ app.post("/addfriend" , async(req, res) => {
         return res.status(200).json({
           msg : "added"
         })
-      }// if is not an friend already , send the request successfully
+      }
+      const requestAlreadyExist = await prisma.requests.findFirst({
+        where : {
+          AND : {
+            senderId : senderid,
+            receiverId : friend.id
+          }
+        }
+      })
+      if(requestAlreadyExist){
+        return res.status(200).json({
+          msg : "already"
+        })
+      }
+      // if is not an friend already , send the request successfully
       try{
         const requestdetails = await prisma.requests.create({
           data : {
+            sender,
             senderId : senderId,
+            receiver,
             receiverId : friend.id,
             status : "PENDING"
           }
@@ -90,15 +107,12 @@ app.post("/addfriend" , async(req, res) => {
     })
   }
 })
-app.post("/getrequest" , async (req , res)=>{
-  const { email } = req.body
+app.post("/getrequests" , async (req , res)=>{
+  const { receiverId } = req.body
   try{
-    const resp = await prisma.users.findMany({
+    const resp = await prisma.requests.findMany({
       where : {
-        email
-      },
-      select : {
-        friends : true
+        receiverId
       }
     })
     if(resp){

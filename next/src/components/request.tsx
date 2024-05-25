@@ -7,14 +7,15 @@ import axios from "axios"
 import dotenv from "dotenv"
 import { ChangeEvent, useState } from "react"
 import { useSession } from "next-auth/react"
-import { Check, X } from "lucide-react"
+import { Check, UserPlus, X } from "lucide-react"
 import { v4 } from "uuid"
 import { socket } from "../utils/socket/io"
+import { UserGroupIcon } from "@heroicons/react/24/outline"
 dotenv.config();
 
 const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL
 
-export const AddNewContactPopup = ()=>{
+export const FriendRequest = ()=>{
     const [receiver ,setEmail] = useState("")
     const {data : session} = useSession()
     const [status , setStatus] = useState<string>("")
@@ -53,8 +54,9 @@ export const AddNewContactPopup = ()=>{
 
     return(
         <Dialog>
-            <DialogTrigger>
-                <Button variant={"ghost"} className="mt-2 w-full">Add new contact</Button>
+            <DialogTrigger asChild>
+                <Button variant={"ghost"} size={"icon"} className="text-sm text-foreground" ><UserPlus/>
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -75,7 +77,8 @@ export const AddNewContactPopup = ()=>{
                     />
                     {/* */}
                     {status === "sent" && <div className="text-green-500 flex">Friend Request sent <Check /></div>}
-                    {status === "added" && <div className="text-red-400 flex gap-1"><X /> Friend Request already sent </div>}
+                    {status === "already" && <div className="text-red-400 flex gap-1"><X /> Friend Request already sent </div>}
+                    {status === "added" && <div className="text-red-400 flex gap-1"><X /> User is already a friend of your's </div>}
                     {status === "notexists" && <div className="text-red-400 flex">User does not exist <X /></div>}
                     {status === "self" && <div className="text-red-400 flex">Cannot send friend request to yourself <X /></div>}
                     {status === "error" && <div className="text-red-400 flex">Internal error</div>}

@@ -1,6 +1,7 @@
 import { io } from "./server";
-import { dataprop, joinRoomHandler, messageHandler } from "./rooms";
-
+import { joinRoomHandler, messageHandler } from "./socketHandlers"
+import { Sockets, removeSocket, userSocket } from "./user-socket";
+import { sendRequest } from "./socketHandlers";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")
@@ -9,23 +10,17 @@ export const SocketConnections = ()=>{
         // io.sockets.sockets.forEach((socket) => {
         //   socket.disconnect(true); // Send a disconnect message to the client
         // });
+        
         socket.on("disconnect", () => {
-          console.log("User disconnected:", socket.id);
+          removeSocket(socket.id)
+          console.log("A user disconnected:", socket.id);
+          console.log(Sockets);
         });
-        socket.on("SEND_REQUEST" , (data)=>{
-          console.log("sendrequest")
-          socket.to(data.receiver).emit("RECEIVED_REQUEST",
-            {
-              sender : data.sender,
-              senderId : data.senderId,
-              receiver : data.receiver,
-            }
 
-          )
+        socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
 
-        })
-        // console.log(joinRoom);
-        socket.on('message', (data : dataprop) => messageHandler(socket, data));
+        socket.on('message', (data) => messageHandler(socket, data));
+        
         socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
         
       });

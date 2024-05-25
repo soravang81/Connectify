@@ -3,10 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { createClient } from 'redis';
-import { dataprop, joinRoomHandler, messageHandler } from './rooms';
-import prisma from '../db/db';
 import cors from "cors"
-import { SocketConnections } from './socket';
 // import prisma from '../db/db';
 // import { handleEvent } from './rooms';
 
@@ -24,6 +21,7 @@ console.log(url)
 export const io = new Server(httpServer, {
   cors: {
     origin: url || "http://localhost:3000",
+    // origin : "*",
     credentials: true,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   },

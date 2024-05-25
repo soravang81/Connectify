@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react"
 
 export const Sidebar = () =>{
     const logOut = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        "use server"
+        // "use server"
         e.preventDefault();
         await signOut();
     }
@@ -24,6 +24,8 @@ export const Sidebar = () =>{
                     </SheetHeader>
                     <Button variant={"ghost"} size={"lg"} href={"/"} className="text-xl w-80">Home</Button>
                     <Button variant={"ghost"} size={"lg"} href={"/"}className="text-xl w-80">Profile</Button>
+                    <Button variant={"ghost"} size={"lg"} className="text-xl w-80" href="/signin">Login</Button>
+                    <Button variant={"ghost"} size={"lg"} className="text-xl w-80" href="/signup">Signup</Button>
                 <SheetFooter>
                     <SheetClose asChild>
                         <Button variant={"ghost"} size={"lg"} fn={logOut}className="text-xl w-80">Logout</Button>
