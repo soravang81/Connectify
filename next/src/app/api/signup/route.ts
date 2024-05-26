@@ -15,6 +15,9 @@ export async function POST(req: NextRequest) {
                 password,
                 username,
             },
+            select : {
+                id : true
+            }
         });
 
         if (user) {

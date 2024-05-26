@@ -6,10 +6,10 @@ import { authOptions } from "@/src/utils/authOptions/auth";
 export interface userr {
     data : {
         id: string
-        email?: string 
-        username?: string
+        // email?: string 
+        // username?: string
         action?: string
-        pfp?: string
+        // pfp?: string
     }
     
 }

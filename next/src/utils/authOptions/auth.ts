@@ -6,10 +6,10 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:3000"
 export interface userr {
     data : {
         id: string
-        email?: string 
-        username?: string
+        // email?: string 
+        // username?: string
         action?: string
-        pfp?: string
+        // pfp?: string
     }
     
 }
@@ -66,20 +66,20 @@ export const authOptions:NextAuthOptions = {
         async jwt({ token, user }) {
             if (user && user.data && user.data.id) {
                 token.id = user.data.id;
-                token.username = user.data.username;
-                token.email = user.data.email;
-                token.pfp = user.data.pfp;
+                // token.username = user.data.username;
+                // token.email = user.data.email;
+                // token.pfp = user.data.pfp;
             }
             return token;
         },
         async session({ session, token }) {
             if (token && token.id) {
                 session.user.id = token.id
-                session.user.username = token.username;
-                session.user.email = token.email;
-                session.user.pfp = token.pfp;
+                // session.user.username = token.username;
+                // session.user.email = token.email;
+                // session.user.pfp = token.pfp;
             }
-            console.log("logged in as : ",session.user.email)
+            console.log("logged in as userid : ",session.user.id)
             return session;
         },
     },

@@ -26,11 +26,9 @@ export const Notifications = ()=>{
     const [req , setRequests] = useState<props[]>([]);
 
     useEffect(()=>{
-        console.log(session?.user)
+        console.log(session?.user.id)
         socket.on("RECEIVED_REQUEST" , (data:props)=>{
-            console.log("receivedreq")
             if(data){
-                console.log("inside socket")
                 setRequests([...req, data])
             }
         })
@@ -39,11 +37,12 @@ export const Notifications = ()=>{
         }
     },[status])
     const fetchRequests = async()=>{
-        
         const url = process.env.NEXT_PUBLIC_SOCKET_URL
+
         if(url){
+            console.log(session?.user.id)
             const res = await axios.post(url+"/getrequests" , {
-                senderId : session?.user.id
+                id : session?.user.id
             })
             if(res.data.resp){
                 console.log(res.data.resp)

@@ -11,6 +11,9 @@ export async function POST(req:NextRequest) {
                 email,
                 password
             }
+        },
+        select : {
+            id :true
         }
     })
     if(res){

@@ -2,39 +2,44 @@ import { Socket } from "socket.io"
 import { Sockets } from "./user-socket";
 import { io } from "./server";
 import { v4 }  from "uuid";
+import { getRequestdetails, getSocketId, getUserdetails } from "./lib/functions";
 
 
 interface requests{
-    sender : string;
-    senderId : string;
-    receiver : string;
+  // sender : string;
+  senderId : number
+  receiver : string;
 }
 interface dataprop{
-    event : string;
-    msg : string;
-    room? : string | string[];
-    sender? : string;
-    receiver? : string;
+  event : string;
+  msg : string;
+  room? : string | string[];
+  sender? : string;
+  receiver? : string;
 }
 
 
-export const sendRequest = (socket : Socket , data:requests)=>{
-    console.log("sendrequest")
-    const receiverSocket = Sockets[data.receiver]
+export const sendRequest = async (socket : Socket , data:requests)=>{
+  console.log("sendingrequest")
+  const res = await getRequestdetails(data.senderId)
+  if(res){
+    const receiverSocket = await getSocketId(res?.receiverId)
     console.log("receiver socket : ",receiverSocket)
-    socket.to(receiverSocket).emit("RECEIVED_REQUEST",
+    if(receiverSocket){
+      socket.to(receiverSocket).emit("RECEIVED_REQUEST",
       {
-        sender : data.sender,
+        sender : res.sender,
         senderId : data.senderId,
         receiver : data.receiver,
-      }
-    )
+      })
+    }
+  }
 }
 
 export const messageHandler = ( socket: Socket ,data :dataprop |string ): void => {
-    console.log("Received message:", data);
-    // io.emit(data.event, data.msg);   
-    io.emit("message" , data) 
+  console.log("Received message:", data);
+  // io.emit(data.event, data.msg);   
+  io.emit("message" , data) 
   };
   
 export const joinRoomHandler = ( socket: Socket ,data :dataprop ): void => {

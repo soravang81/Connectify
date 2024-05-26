@@ -1,18 +1,25 @@
 interface props {
-    [userEmail: string]: string
+    socketId?: string,
+    userId? : number
 }
-export let Sockets:props = {};
+export let Sockets:props[] = [];
 
-export const userSocket = (userEmail:string, socketId:string) => {
-    Sockets = {
-        ...Sockets,
-        [userEmail]: socketId,
+export const userSocket = ( socketId:string , userId:number) => {
+    const newSockets = {
+        socketId: socketId,
+        userId: userId,
     };
+    Sockets.push(newSockets)
 };
-export const removeSocket = (socketId:string)=>{
-    for (const key in Sockets) {
-        if (Sockets[key] === socketId) {
-            delete Sockets[key];
-        }
+export const removeSocket = (id: string | number)=>{
+    if(typeof id === "string"){
+        const index = Sockets.findIndex(s => s.socketId === id);
+        Sockets.splice(index, 1)[0];
+        console.log(Sockets)
+    }
+    else{
+        const index = Sockets.findIndex(s => s.userId === id);
+        Sockets.splice(index, 1)[0];
+        console.log(Sockets)
     }
 }

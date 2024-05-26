@@ -10,7 +10,6 @@ import { useSession } from "next-auth/react"
 import { Check, UserPlus, X } from "lucide-react"
 import { v4 } from "uuid"
 import { socket } from "../utils/socket/io"
-import { UserGroupIcon } from "@heroicons/react/24/outline"
 dotenv.config();
 
 const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL
@@ -26,29 +25,17 @@ export const FriendRequest = ()=>{
     }
     async function handleSubmit(){
         if(session?.user){
-            const sender = session.user.email
-            console.log(sender , receiver)
-
-        if(sender === receiver){
-            setStatus("self")
-            return
-        }
-        }
-        console.log(status)
-        if(status !== "self" ){
             const res = await axios.post(socketurl+"/addfriend" , {
-                sender : session?.user.email,
                 senderId : session?.user.id,
                 receiver,
             })
             socket.emit("SEND_REQUEST" , {
-                sender : session?.user.email,
                 senderId : session?.user.id,
                 receiver,
                 roomId : v4()
             })
             setStatus(res.data.msg)
-            console.log(res , res.data)
+            console.log()
         }
     }
 

@@ -4,8 +4,6 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { createClient } from 'redis';
 import cors from "cors"
-// import prisma from '../db/db';
-// import { handleEvent } from './rooms';
 
 dotenv.config(); 
 
