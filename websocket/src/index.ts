@@ -1,31 +1,26 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import dotenv from 'dotenv';
-import { createClient } from 'redis';
-import { dataprop, joinRoomHandler, messageHandler } from './rooms';
-import prisma from '../db/db';
-import cors from "cors"
-// import prisma from '../db/db';
-// import { handleEvent } from './rooms';
+import prisma from "../db/db";
+import { getUserdetails } from "./lib/functions";
+import { app, io, startServer, url } from "./server";
+import { SocketConnections } from "./socket";
+import { Sockets, userSocket } from "./user-socket";
 
-dotenv.config(); 
+// start the server
+const start = async () => {
+  await startServer();
+  SocketConnections();
+}
 
-const app = express();
-const redis = createClient();
-const httpServer = createServer(app);
-app.use(express.json())
-app.use(cors())
+start();
 
-const url = process.env.FRONTEND_URL;
-const port = process.env.SOCKET_PORT || 8080;
-console.log(url)
-export const io = new Server(httpServer, {
-  cors: {
-    origin: url || "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-  },
+//routes  
+io.use((socket, next) => {
+  const userId = socket.handshake.query.userId;
+  if(userId !== undefined && typeof userId === "string"){
+    const userid = parseInt(userId);
+    userSocket(socket.id , userid)
+    console.log(Sockets)
+  }
+  next();
 });
 
 app.get("/", (req, res) => {
@@ -33,110 +28,100 @@ app.get("/", (req, res) => {
   console.log(`Frontend URL: ${url}`);
 });
 
-async function startServer() {
-  try {
-    await redis.connect();
-    console.log("Connected to Redis");
-
-    httpServer.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-    
-  } catch (error) {
-      console.error("Failed to connect to Redis", error);
-  }
-}
-
-startServer();
-
-//socket connection
-
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-  // io.sockets.sockets.forEach((socket) => {
-  //   socket.disconnect(true); // Send a disconnect message to the client
-  // });
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-  socket.on('message', (data : dataprop) => messageHandler(socket, data));
-  socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
-  
-});
-
-//routes
 
 app.post("/addfriend" , async(req, res) => {
-  const {sender , receiver} = req.body;
-
-  if(sender === receiver){
-    return res.json({
-      msg : "self"
-    })
-    // return res.json(false)
-  }
-  try{ 
+  const {senderId , receiver ,roomId} = req.body;
+  const senderid = parseInt(senderId)
+  const senderInfo = await getUserdetails(senderid)
+  console.log("sender info : ",senderInfo)
+  const receiverInfo = await getUserdetails(receiver)
+  console.log("receiver info : ",receiverInfo)
+  try{ //check if the receiver exist or not
     const friend = await prisma.users.findFirst({
       where : {
         email : receiver
       }
-    })
+    }) 
     if(friend){
+      if(senderid === friend.id){
+        return res.status(400).json({
+          msg : "self"
+        })
+      }
+      //if receiver exists , check if he already a friend of sender
       const exists = await prisma.users.findFirst({
         where : {
-          email : sender,
-          friends : {
-            has : friend.username
+          AND : {
+            id : senderid,
+            friends : {
+              has : friend.id
+            }
           }
         }
       })
       console.log(exists)
       if(exists){
-        return res.json({
+        return res.status(200).json({
           msg : "added"
         })
       }
-      else {
-        const user = await prisma.users.update({
+      const requestAlreadyExist = await prisma.requests.findFirst({
+        where : {
+          AND : {
+            senderId : senderid,
+            receiverId : friend.id
+          }
+        }
+      })
+      if(requestAlreadyExist){
+        return res.status(200).json({
+          msg : "already"
+        })
+      }
+      // if is not an friend already , send the request successfully
+      try{
+        const requestdetails = await prisma.requests.create({
           data : {
-            friends : {
-              push : friend.username
-            }
-          },
-          where : {
-            email : sender
+            sender : senderInfo?.email,
+            senderId : senderId,
+            receiver,
+            receiverId : friend.id,
+            status : "PENDING"
           }
         })
-        if(user){
-          return res.json({
-            msg : "sent"
-          })
-        }
-        else{
-          return res.json(false)
-        }
+        console.log(requestdetails);
+        return res.status(201).json({
+          msg : "sent"
+        })
+        
+      }
+      catch{//if unable to process prisma request
+        console.log("request details not saved")
+        return res.status(202).json({
+          msg : "error"
+        })
       }
     }
-    else{
-      return res.json(false)
+    else{// receiver does not exists
+      return res.status(200).json({
+        msg : "notexists"
+      })
     }
   }
   catch(e){
     console.log(e)
-    return res.json({
-      error  : e
+    return res.status(500).json({
+      error : e
     })
   }
 })
-app.post("/getfriend" , async (req , res)=>{
-  const { email } = req.body
+app.post("/getrequests" , async (req , res)=>{
+  const { id } = req.body
+  console.log(id)
   try{
-    const resp = await prisma.users.findMany({
+    const resp = await prisma.requests.findMany({
       where : {
-        email
-      },
-      select : {
-        friends : true
+        receiverId : id
       }
     })
     if(resp){

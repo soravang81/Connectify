@@ -5,19 +5,19 @@ declare module "next-auth" {
     interface Session extends DefaultSession{
         user: {
             id: string
-            email: string
-            username: string
-            pfp?: string | null
+            // email: string
+            // username: string
+            // pfp?: string | null
         };
     }
 
     interface User extends DefaultUser {
         data : {
             id: string
-            email: string
-            username: string
+            // email: string
+            // username: string
             action: string
-            pfp?: string | null
+            // pfp?: string | null
         }
     }
 }
@@ -25,8 +25,8 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
     interface JWT extends DefaultJWT {
         id: string
-        email: string
-        username: string
-        pfp?: string | null
+        // email: string
+        // username: string
+        // pfp?: string | null
     }
 }

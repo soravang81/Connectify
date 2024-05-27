@@ -1,22 +1,26 @@
 import { NextApiRequest } from "next";
 import prisma from "@/db/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req:NextApiRequest) {
-    const { email , password , username } = req.body;
+export async function POST(req:NextRequest) {
+    const { email , password } = await req.json()
     console.log("received")
     const res = await prisma.users.findFirst({
         where : {
-            email,
-            password,
-            username
+            AND : {
+                email,
+                password
+            }
+        },
+        select : {
+            id :true
         }
     })
     if(res){
-        console.log("succeed")
-        NextResponse.redirect("/");
+        // console.log("succeed")
+        return NextResponse.json(res);
     }
     else{
-        NextResponse.json(false)
+        return NextResponse.json(false)
     }
 }
