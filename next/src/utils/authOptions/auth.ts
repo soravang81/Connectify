@@ -47,7 +47,8 @@ export const authOptions:NextAuthOptions = {
                     }
                 }
                 else if (credentials.action === "signup") {
-                    const { email, password , username } = credentials;
+                    try{
+                        const { email, password , username } = credentials;
                     console.log(email , password , username)
                     const user = await axios.post(`${backendUrl}/api/signup` ,{ 
                         email : email ,
@@ -58,6 +59,11 @@ export const authOptions:NextAuthOptions = {
                     if (user) {
                         return user as User | null;
                     } else {
+                        return null;
+                    }
+                    }
+                    catch(e){
+                        console.log(e)
                         return null;
                     }
                 }
