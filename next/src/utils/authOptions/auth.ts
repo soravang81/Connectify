@@ -1,8 +1,10 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import NextAuth, { DefaultSession , Session, User , NextAuthOptions} from "next-auth"
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
-const backendUrl = process.env.BACKEND_URL || "http://localhost:3000"
+const backendUrl = process.env.BACKEND_URL
 export interface userr {
     data : {
         id: number
