@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const url = process.env.FRONTEND_URL
 export async function POST(req: NextRequest) {
     try {
-        // console.log("Request received");
+        console.log("Request received");
 
         const { email, password, username } = await req.json();
         console.log(email, password, username);
