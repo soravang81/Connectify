@@ -36,12 +36,14 @@ export default function SignupComp() {
           action : "signup",
           redirect : false
         });
-        if (!res) {
+        
+        if (res?.ok) {
+        console.log("Signup successful");
+        router.push("/");
+        }
+        else{
           console.error("Signup failed");
-        } else {
-          console.log("Signup successful");
-          router.push("/");
-      }
+        }
       }
     } catch (error) {
       console.error("Error:", error); 

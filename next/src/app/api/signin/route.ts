@@ -16,7 +16,8 @@ export async function POST(req:NextRequest) {
             id :true
         }
     })
-    if(res){
+    console.log(res)
+    if(res?.id){
         // console.log("succeed")
         return NextResponse.json(res);
     }

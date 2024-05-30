@@ -8,7 +8,7 @@ import cors from "cors"
 dotenv.config(); 
 
 export const app = express();
-const redis = createClient();
+export const redis = createClient();
 const httpServer = createServer(app);
 app.use(express.json())
 app.use(cors())

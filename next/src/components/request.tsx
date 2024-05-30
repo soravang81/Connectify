@@ -29,11 +29,14 @@ export const FriendRequest = ()=>{
                 senderId : session?.user.id,
                 receiver,
             })
-            socket.emit("SEND_REQUEST" , {
-                senderId : session?.user.id,
-                receiver,
-                roomId : v4()
-            })
+            console.log("msggg : ",res.data.msg)
+            if(res.data.msg === "sent"){
+                socket.emit("SEND_REQUEST" , {
+                    senderId : session?.user.id,
+                    receiver,
+                    roomId : v4()
+                })
+            }
             setStatus(res.data.msg)
             console.log()
         }

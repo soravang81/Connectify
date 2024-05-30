@@ -25,17 +25,20 @@ export default function SigninComp() {
         setIsError(true)
       }
       else{
+        console.log(email,
+          password,)
         const res = await signIn('credentials', {
           email,
           password,
           action : "signin",
           redirect : false
         });
-        if (!res) {
-          console.error("Signup failed");
-        } else {
+        if (res?.ok) {
+          console.log(res)
           console.log("Signup successful");
           router.push("/");
+        } else {
+          console.error("Signup failed");
       }
       }
     } catch (error) {

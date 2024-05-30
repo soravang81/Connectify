@@ -26,7 +26,7 @@ model Users {
 model Requests {
   id          Int           @id @default(autoincrement())
   sender      String?         
-  senderId     Int          
+  senderId     Int        
   receiver     String?         
   receiverId   Int                   
   status       RequestStatus @default(PENDING)
