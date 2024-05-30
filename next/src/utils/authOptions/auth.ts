@@ -52,6 +52,7 @@ export const authOptions:NextAuthOptions = {
                         password :password ,
                         username : username  
                     }) as userr | false;
+                    console.log(user)
                     if (user) {
                         return user as User | null;
                     } else {
