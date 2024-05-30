@@ -1,11 +1,16 @@
+"use client"
+import dotenv from "dotenv";
+import { FriendsList } from "@/src/components/friends";
 import { Container } from "@/src/components/container";
-import Navbar from "../components/navbar";
-import { Button } from "../components/ui/button";
-import { DashBoard } from "../components/dashboard";
-import { FriendsList } from "../components/friends";
-import { ChatSection } from "../components/chat";
+import { ChatSection } from "@/src/components/chat";
+import { getSession, useSession } from "next-auth/react";
+import Navbar from "@/src/components/navbar";
+import { DashBoard } from "@/src/components/dashboard";
+dotenv.config();
 
-export default function Home(){
+export default function (){
+  const {data : session} =  useSession();
+  if(session?.user){
     return(
       <Container className="flex flex-col min-w-screen min-h-[92.9vh] mb-0">
         <Navbar/>
@@ -16,4 +21,6 @@ export default function Home(){
         </div>
       </Container>
     )
+  }
 }
+

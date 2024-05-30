@@ -1,22 +1,35 @@
 import { socket } from "./io";
 
+import { v4 } from "uuid";
+import { redirect, useRouter } from "next/navigation";
+
 const socketurl = process.env.SOCKET_URL || "http://localhost:8080";
 
-export interface dataprop{
-  event : string;
-  msg : string;
-  room? : string | string[];
-  sender? : string;
-  receiver? : string;
+interface dataprop{
+  message : string;
+  sid? : number;
+  rid : number;
 }
-export const sendMessage = ( event :string , data: string): void => {
+
+interface joinRoom{
+  sid : number | string;
+  rid : number | string;
+}
+
+export const sendMessage = (data: dataprop): void => {
   console.log("sent :", data);
-  socket.emit(event, data);    
+  socket.emit("message", data);
 };
 
-export const handleJoinRoom = (data: {room : string}): void => {
-console.log("User joined room:", data.room);
-};
+export const joinRoom = (props:joinRoom) => {
+  const roomId = v4()
+    socket.emit("JOIN_ROOM" , {
+      senderId : props.sid,
+      receiverId : props.rid,
+      roomId
+    })
+    redirect(`/chat/${roomId}`)
+}
 
 export const handleLeaveRoom = (data: { room : string }): void => {
 console.log("User left room:", data.room);

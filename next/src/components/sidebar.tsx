@@ -1,14 +1,9 @@
 import { Button } from "@/src/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet , SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/src/components/ui/sheet"
-import { signOut } from "next-auth/react"
+import { LogOut } from "../utils/functions/lib";
 
 export const Sidebar = () =>{
-    const logOut = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        // "use server"
-        e.preventDefault();
-        await signOut();
-    }
     return(
         <Sheet>
             <SheetTrigger asChild>
@@ -28,7 +23,7 @@ export const Sidebar = () =>{
                     <Button variant={"ghost"} size={"lg"} className="text-xl w-80" href="/signup">Signup</Button>
                 <SheetFooter>
                     <SheetClose asChild>
-                        <Button variant={"ghost"} size={"lg"} fn={logOut}className="text-xl w-80">Logout</Button>
+                        {/* <LogOut/> */}
                     </SheetClose>
                 </SheetFooter>
             </div>

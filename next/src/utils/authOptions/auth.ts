@@ -5,7 +5,7 @@ import axios from "axios";
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000"
 export interface userr {
     data : {
-        id: string
+        id: number
         // email?: string 
         // username?: string
         action?: string
@@ -29,16 +29,18 @@ export const authOptions:NextAuthOptions = {
                     return null;
                 }
                 if (credentials.action === "signin") {
-                    const { email, password , username } = credentials;
+                    console.log(credentials)
+                    const { email, password } = credentials;
                     const user = await axios.post(`${backendUrl}/api/signin` ,
                     { 
                         email : email ,
                         password :password ,
-                        username : username  
                     }) as userr | false;
                     if (user) {
+                        console.log(user)
                         return user as User | null;
                     } else {
+                        console.log(user)
                         return null;
                     }
                 }

@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import { RecoilRoot } from 'recoil';
 import { ThemeProvider } from '../utils/theme/theme';
 import { connect } from '../utils/socket/io';
+import { ToastContainer } from 'react-toastify';
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
@@ -16,8 +17,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
             attribute="class"
             defaultTheme="dark"
             enableSystem
-            disableTransitionOnChange
-          >
+            disableTransitionOnChange>
+          <ToastContainer>
+          </ToastContainer>
           {children}
         </ThemeProvider>
       </RecoilRoot>
