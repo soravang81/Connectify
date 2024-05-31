@@ -20,18 +20,20 @@ model Users {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @default(now())
   requests          Requests[]
+  userrequests      UserRequests[]
 }
 
 model Requests {
-  id          Int                       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   sender      String?         
   senderId     Int        
   receiver     String?         
   receiverId   Int                   
-  status       RequestStatus            @default(PENDING)
-  createdAt   DateTime                  @default(now())
+  status       RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
   acceptedAt  DateTime?
-  user         Users                    @relation(fields: [senderId], references: [id]) 
+  user         Users        @relation(fields: [senderId], references: [id]) 
+  userrequests UserRequests[]
 }
 
 enum RequestStatus {
@@ -39,27 +41,10 @@ enum RequestStatus {
   ACCEPTED
   REJECTED
 }
-model Chat {
-  id                  Int           @id @default(autoincrement())
-  senderId            Int
-  receiverId          Int
-  message             Int
-  time                DateTime 
-}
-model Group {
-  id                  Int                 @id @default(autoincrement())
-  name                String
-  pfp                 String?
-  members             Int[]
-  admins              Int[]
-  Groupchat           Groupchat[]
-}
-model Groupchat {
-  id                  Int                 @id @default(autoincrement())
-  groupId             Int                 
-  senderId            Int
-  members             Int[]
-  message             Int
-  time                DateTime
-  group               Group                @relation(fields: [groupId] ,references: [id])
-}
+ model UserRequests {
+  id           Int            @id @default(autoincrement())
+  userId       Int
+  requestId    Int
+  user          Users         @relation(fields: [userId], references: [id])
+  requests      Requests      @relation(fields: [requestId], references: [id])
+ }

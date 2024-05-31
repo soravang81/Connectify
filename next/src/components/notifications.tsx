@@ -24,14 +24,15 @@ interface props{
     createdAt : Date
     user : {
         username : string;
-        pfp? : string | null
+        // pfp? : string | null
     }
   }
 export const Notifications = ()=>{
-    // friend request accept notification when accepted.
-    const {data : session,status} = useSession()
+    const  {data : session,status} = useSession()
     const [req , setRequests] = useState<props[]>([]);
+    const [count , setCount] = useState<number>(0);
     const [refetch , setRefetch] = useRecoilState<boolean>(refetchFriends);
+    // console.log(req.length)
 
     useEffect(()=>{
         console.log(session?.user.id)
@@ -39,6 +40,10 @@ export const Notifications = ()=>{
             fetchRequests()
         // }
         socket.on("RECEIVED_REQUEST" , (data:props)=>{
+            // setCount(count+1)
+            // // if(data){
+            // //     setRequests([...req, data])
+            // // }
             fetchRequests()
         }) }       
     },[status])
@@ -49,6 +54,7 @@ export const Notifications = ()=>{
             console.log(session?.user.id)
             const res = await axios.get(url+`/requests?id=${id}`)
             if(res.data.request){
+                // console.log(res.data.request)
                 setRequests(res.data.request);
             }
         }
@@ -65,9 +71,6 @@ export const Notifications = ()=>{
             })
             const index = req.findIndex(r => r.senderId === id);
             req.splice(index, 1)[0];
-            if(res){
-                
-            }
             fetchRequests()
             setRefetch(!refetch)
         }
@@ -83,26 +86,28 @@ export const Notifications = ()=>{
             </PopoverTrigger>
             <PopoverContent className="w-96 p-2 min-h-20">
                 <div>
+                    {/* <h3>Your Friend Requests</h3> */}
+                    {/* {req} */}
                     {req.map((item)=>{
                         return(
-                        <Card key={item.senderId} id={item.senderId.toString()} className="rounded-md border-slate-600 border-2 flex gap-4 p-1">
-                            <div className="p-4">
-                                {/* {<img src={item.user.pfp} alt="img" className="rounded-full h- w-6" />: null} */}
-                            </div>
-                            <div className="flex flex-col justify-start w-full">
-                                <div className="flex justify-between p-2 w-full">
-                                    <h5 className="font-semibold text-lg">{item.user.username}</h5>
-                                    <span className="text-sm">{getTimeDifference(item.createdAt)}
-                                    </span>
+                            <Card key={item.senderId} id={item.senderId.toString()} className="rounded-md border-slate-600 border-2 flex gap-4 p-1">
+                                <div className="p-4">
+                                    {/* {<img src={item.user.pfp} alt="img" className="rounded-full h- w-6" />: null} */}
                                 </div>
-                                <div className="flex gap-6 justify-center">
-                                    <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accept"} onClick={(e)=>handleClick(e , item.senderId)}>Accept
-                                    </Button>
-                                    <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"reject"} onClick={(e)=>handleClick(e , item.senderId)}>Reject
-                                    </Button>
+                                <div className="flex flex-col justify-start w-full">
+                                    <div className="flex justify-between p-2 w-full">
+                                        <h5 className="font-semibold text-lg">{item.user.username}</h5>
+                                        <span className="text-sm">{getTimeDifference(item.createdAt)}
+                                        </span>
+                                    </div>
+                                    <div className="flex gap-6 justify-center">
+                                        <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accept"} onClick={(e)=>handleClick(e , item.senderId)}>Accept
+                                        </Button>
+                                        <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"reject"} onClick={(e)=>handleClick(e , item.senderId)}>Reject
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        </Card>
+                            </Card>
                         )
                     })}
                 </div>
