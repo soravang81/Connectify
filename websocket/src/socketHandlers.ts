@@ -17,11 +17,9 @@ interface dataprop{
 }
 
 export const sendRequest = async (socket : Socket , data:requests)=>{
-  console.log("sendingrequest")
   const res = await getRequestdetails({senderId : data.senderId})
   if(res){
     const receiverSocket = await getSocketId(res.receiverId)
-    console.log("receiver socket : ",receiverSocket)
     if(receiverSocket){
       socket.to(receiverSocket).emit("RECEIVED_REQUEST"
       // redis.
@@ -38,7 +36,9 @@ export const messageHandler = async( socket: Socket ,data :dataprop) => {
     socket.to(receiverSocket).emit("message" , {
       message : data.message,
       sid : data.sid,
+      rid : data.rid
     })
+    //redis upload message -> then to database
   }
 }
 

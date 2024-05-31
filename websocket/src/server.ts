@@ -4,12 +4,18 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { createClient } from 'redis';
 import cors from "cors"
+import user from './routes/user/user';
+import admin from './routes/admin/admin';
 
 dotenv.config(); 
 
 export const app = express();
 export const redis = createClient();
 const httpServer = createServer(app);
+const router = express.Router();
+
+app.use('/user', user);
+app.use('/admin', admin);
 app.use(express.json())
 app.use(cors())
 

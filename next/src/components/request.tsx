@@ -31,6 +31,7 @@ export const FriendRequest = ()=>{
             })
             console.log("msggg : ",res.data.msg)
             if(res.data.msg === "sent"){
+                console.log("sent request by socket")
                 socket.emit("SEND_REQUEST" , {
                     senderId : session?.user.id,
                     receiver,
