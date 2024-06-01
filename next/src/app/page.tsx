@@ -1,11 +1,20 @@
+"use client";
+
 import { Container } from "@/src/components/container";
 import Navbar from "../components/navbar";
 import { Button } from "../components/ui/button";
 import { DashBoard } from "../components/dashboard";
 import { FriendsList } from "../components/friends";
 import { ChatSection } from "../components/chat";
+import { useEffect } from "react";
+import { socket } from "../utils/socket/io";
 
 export default function Home(){
+  useEffect(()=>{
+    return (()=>{
+      socket.disconnect()
+    })
+  })
     return(
       <Container className="flex flex-col min-w-screen min-h-[92.9vh] mb-0">
         <Navbar/>
