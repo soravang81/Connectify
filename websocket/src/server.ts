@@ -24,8 +24,8 @@ export const port = process.env.SOCKET_PORT || 8080;
 console.log(url)
 export const io = new Server(httpServer, {
   cors: {
-    origin: url || "http://localhost:3000",
-    // origin : "*",
+    // origin: url || "http://localhost:3000",
+    origin : "*",
     credentials: true,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   },
