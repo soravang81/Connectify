@@ -17,7 +17,7 @@ export async function POST(req:NextRequest) {
         }
     })
     console.log(res)
-    if(res?.id){
+    if(typeof res?.id === "number" ){
         // console.log("succeed")
         return NextResponse.json(res);
     }

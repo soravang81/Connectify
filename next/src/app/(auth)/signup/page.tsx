@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { signIn } from "next-auth/react";
 import { SignupSchema } from "@/src/utils/zod/schema";
+import { connect } from "@/src/utils/socket/io";
 
 
 
@@ -38,6 +39,7 @@ export default function SignupComp() {
         });
         
         if (res?.ok) {
+        await connect() 
         console.log("Signup successful");
         router.push("/");
         }

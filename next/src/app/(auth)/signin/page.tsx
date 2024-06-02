@@ -1,9 +1,10 @@
 "use client"
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { signIn } from "next-auth/react";
 import { SigninSchema } from "@/src/utils/zod/schema";
+import { connect, socket } from "@/src/utils/socket/io";
 
 export default function SigninComp() {
   const [email,setcurEmail] = useState<string>("")
@@ -12,6 +13,15 @@ export default function SigninComp() {
   const [isError, setIsError] = useState<boolean>(false);
 
   const router = useRouter();
+  // useEffect(()=>{
+  //   socket.disconnect()
+
+  //   return(()=>{
+  //     if(!socket.connected){
+  //       socket.connect()
+  //     }
+  //   })
+  // })
   
   const handleClick = async (e:FormEvent) => {
     e.preventDefault()
@@ -34,8 +44,9 @@ export default function SigninComp() {
           redirect : false
         });
         if (res?.ok) {
-          console.log(res)
           console.log("Signup successful");
+          
+          console.log(res)
           router.push("/");
         } else {
           console.error("Signup failed");
