@@ -8,11 +8,8 @@ const backendUrl = process.env.BACKEND_URL
 export interface userr {
     data : {
         id: number
-        // email?: string 
-        // username?: string
         action?: string
-        // pfp?: string
-    }
+    } | false
     
 }
 
@@ -33,17 +30,17 @@ export const authOptions:NextAuthOptions = {
                 if (credentials.action === "signin") {
                     console.log(credentials)
                     const { email, password } = credentials;
-                    const user = await axios.post(`${backendUrl}/api/signin` ,
+                    const user:userr  = await axios.post(`${backendUrl}/api/signin` ,
                     { 
                         email : email ,
                         password :password ,
-                    }) as userr | false;
-                    if (user) {
-                        console.log(user)
-                        return user as User | null;
-                    } else {
-                        console.log(user)
-                        return null;
+                    })
+                    if(user.data === false){
+                        return null
+                    } 
+                    else{
+                        console.log("userdata is : " ,user.data)
+                        return user as User;
                     }
                 }
                 else if (credentials.action === "signup") {
@@ -54,12 +51,14 @@ export const authOptions:NextAuthOptions = {
                         email : email ,
                         password :password ,
                         username : username  
-                    }) as userr | false;
+                    }) as userr
                     console.log(user)
-                    if (user) {
-                        return user as User | null;
-                    } else {
-                        return null;
+                    if(user.data === false){
+                        return null
+                    } 
+                    else{
+                        console.log("userdata is : " ,user.data)
+                        return user as User;
                     }
                     }
                     catch(e){

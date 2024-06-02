@@ -1,11 +1,12 @@
 import { getSession } from 'next-auth/react';
 import { io } from 'socket.io-client';
 
-const socketurl = process.env.SOCKET_URL || "http://localhost:8080";
+const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL || "";
+
 export const socket = io(socketurl, {
-        autoConnect: false,
-        // reconnection : true
-    });
+  autoConnect: false,
+}); 
+
 export async function connect(){
   const session = await getSession()
     if(session?.user){

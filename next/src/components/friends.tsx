@@ -4,20 +4,24 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Card } from "./ui/card";
 import { Container } from "./container";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { encrypt } from "../utils/functions/lib";
 import { useRouter } from "next/navigation";
 import { refetchFriends } from "../utils/recoil/state";
+import { socket } from "../utils/socket/io";
+import { Badge } from "./ui/badge";
 
 interface friends{
   id : number,
   username : string,
-  pfp : string | null
+  pfp : string | null,
+  msgCount : number
 }
 
 export const FriendsList = () => {
   const { data: session } = useSession();
   const [friendList, setFriendList] = useState<[friends | null]>([null]);
+  const [msgCount, setMsgCount] = useState<number>(0);
   const refetch = useRecoilValue<boolean>(refetchFriends);
   const router = useRouter()
   const url = process.env.NEXT_PUBLIC_SOCKET_URL;
@@ -33,23 +37,21 @@ export const FriendsList = () => {
       }
     }
   };
+  socket.on("message" , (data) => {
+    if(session?.user.id === data.rid){
+
+    }
+  })
   useEffect(() => {
     if (session?.user) {
       getFriends();
     }
-  }, [session, url , refetch]);
+  }, [session, refetch]);
 
   const handleClick = (rid : number)=>{
     const uid = encrypt(rid.toString())
     console.log(uid)
     router.push(`/chat/${uid}`)
-    
-    // if(session && session.user.id ){
-    //   joinRoom({
-    //     sid : session.user.id,
-    //     rid
-    //   })
-    // }
   }
 
   return (
@@ -68,6 +70,7 @@ export const FriendsList = () => {
                     <h5 className="font-semibold text-2xl self-center" >{friend.username}</h5>
                   </div>
                 </div>
+                {friend.msgCount ===0 ? <Badge variant={"default"} className="self-center size-4 bg-red-500 flex justify-center items-center p-2">{friend.msgCount}</Badge> : null}
               </Card>
             )
           }
