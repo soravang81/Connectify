@@ -8,6 +8,10 @@ interface dataprop{
   sid? : number;
   rid : number;
 }
+interface seen{
+  rid : number;
+  sid : number;
+}
 
 interface joinRoom{
   sid : number | string;
@@ -17,7 +21,6 @@ interface joinRoom{
 export const sendMessage = (data: dataprop): void => {
   socket.emit("message", data);
 };
-
 export const joinRoom = (props:joinRoom) => {
   const roomId = v4()
     socket.emit("JOIN_ROOM" , {

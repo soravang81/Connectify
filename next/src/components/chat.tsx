@@ -8,6 +8,9 @@ import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { Send } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { mountMsgBox,  refetchUserData,  undreadmsgcount,  userData } from "../utils/recoil/state";
+import { useRecoilState } from "recoil";
+import { Msgbox } from "./msgbox";
 
 interface receivedMessage{
   message : string;
@@ -19,6 +22,7 @@ interface sentMessage{
   sid : number,
   rid : number,
   time : Date;
+  seen : boolean
 }
 interface messages {
   message : string,
@@ -28,22 +32,31 @@ interface messages {
 
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
+    const [notprocessed, setnotProcessed] = useState<boolean>(true);
     const [messages, setMessages] = useState<messages[]>([]);
     const { data: session } = useSession();
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
+    const [userdata , setUserData] = useRecoilState(userData);
     const [rid, setCurrentUrl] = useState(0);
+    const [mount , setMount] = useRecoilState(mountMsgBox)
+    const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
+    // console.log(notprocessed)
     // todo : fetch old messages from server on refresh
     useEffect(() => {
+      setMount(true)
       const fetchCurrentUrl = async () => {
         if (typeof window !== 'undefined') {
           const currentUrl = window.location.href;
           const urlParts = currentUrl.split('/');
           const rid = parseInt(urlParts[urlParts.length - 1])
           setCurrentUrl(rid);
+          console.log(rid)
         }
       };
       fetchCurrentUrl();
+      setRefetchUserData(!refetchUserData)
+      
     }, []);
     //sendmessage
     const sendMessageHandler = () => {
@@ -52,7 +65,8 @@ export const ChatSection = ()=>{
           message : message,
           sid : session?.user.id,
           rid : rid,
-          time : new Date()
+          time : new Date(),
+          seen : false
         }
         sendMessage(newMessage)
         setMessages([...messages , {
@@ -61,21 +75,18 @@ export const ChatSection = ()=>{
           time : new Date()
         }])
         setMessage("");
+        console.log("msg sent")
       }
     };
-    //receivemessage
     socket.on("message" , (data) => {
-      const newMessage : receivedMessage = {
-        message : data.message,
-        sid : data.sid,
-        time : new Date()
-      }
+      console.log(userdata.friends)
       setMessages([...messages , {
         message : data.message,
         type : "received" ,
         time : new Date()
       }])
-    });
+    }
+  );
     const scrollToBottom = () => {
       if (msgbox.current) {
           msgbox.current.scrollTop = msgbox.current.scrollHeight;
@@ -87,7 +98,8 @@ export const ChatSection = ()=>{
 
     return (
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 
-        <div className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col" ref={msgbox}>
+        {/* {mount &&  */}
+        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col">
             {messages.map((msg, index)=>{
               return(
                 <p key={index} className={`text-2xl border w-fit p-1 border-foreground rounded-lg ${msg.type === "sent"? "self-end" : ""}`}>{msg.message} <span className="text-xs">{msg.time.toLocaleTimeString()}</span></p>
@@ -95,6 +107,7 @@ export const ChatSection = ()=>{
             })}
             <div ref={bottom}></div>
         </div>
+        {/* } */}
         <form className="flex gap-6" onSubmit={(e)=>e.preventDefault()}>
             <Input
             className="lg:py-7 py-5 text-xl"

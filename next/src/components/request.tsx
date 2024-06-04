@@ -25,7 +25,7 @@ export const FriendRequest = ()=>{
     }
     async function handleSubmit(){
         if(session?.user){
-            const res = await axios.post(socketurl+"/addfriend" , {
+            const res = await axios.post(socketurl+"/request/send" , {
                 senderId : session?.user.id,
                 receiver,
             })

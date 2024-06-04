@@ -1,5 +1,5 @@
 import prisma from "../../db/db"
-import { Sockets } from "../user-socket"
+import { Sockets } from "../socket/user-socket"
 import * as crypto from 'crypto';
 import dotenv from "dotenv"
 dotenv.config()

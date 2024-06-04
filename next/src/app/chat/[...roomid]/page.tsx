@@ -7,16 +7,21 @@ import { getSession, useSession } from "next-auth/react";
 import Navbar from "@/src/components/navbar";
 import { DashBoard } from "@/src/components/dashboard";
 import { useEffect } from "react";
-import { socket } from "@/src/utils/socket/io";
+import { connect, socket } from "@/src/utils/socket/io";
+import { mountMsgBox } from "@/src/utils/recoil/state";
+import { useRecoilState } from "recoil";
 dotenv.config();
 
 export default function (){
+  const [mount , setMount] = useRecoilState(mountMsgBox)
   const {data : session} =  useSession();
   useEffect(()=>{
+    // setMount(true)
+    connect()
     return (()=>{
       socket.disconnect()
     })
-  })
+  },[])
   if(session?.user){
     return(
       <Container className="flex flex-col min-w-screen min-h-[92.9vh] mb-0">

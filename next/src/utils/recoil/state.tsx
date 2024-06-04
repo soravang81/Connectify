@@ -1,17 +1,86 @@
-import { atom } from 'recoil';
-import { Socket, io } from 'socket.io-client';
+import { atom, useSetRecoilState } from 'recoil';
 
-const socketurl = process.env.SOCKET_URL || "http://localhost:8080";
-
-
-export const DialogState = atom({
-  key: 'DialogState',
+export const friendsFetched = atom({
+  key: 'friendsFetched',
+  default: false,
+});
+export const notificationFetched = atom({
+  key: 'notificationFetched',
+  default: false,
+});
+export const refetchUserData = atom({
+  key: 'refetchUserData',
+  default: false,
+});
+export const mountMsgBox = atom({
+  key: 'mountMsgBox',
   default: false,
 });
 export const CurrentChatUserId = atom({
   key: 'CurrentChatUserId',
   default: "",
 });
+interface friends{
+  id : number,
+  username : string,
+  pfp : string | null,
+  unreadMessageCount : number
+}
+export const FriendList = atom<[friends] | []>({
+  key: 'FriendList',
+  default: []
+});
+export interface UserData {
+  id: number;
+  username: string;
+  email: string;
+  pfp: string;
+  friends: {
+    id: number;
+    username: string;
+    pfp: string;
+    unreadMessageCount: number;
+  }[];
+  notifications: number;
+  pendingRequests: {
+    id: number;
+    username: string;
+    pfp: string;
+    createdAt: string;
+  }[];
+}
+export let undreadmsgcount = 0
+export const userData = atom<UserData>({
+  key: 'userData',
+  default: {
+    id : 0,
+    username : "",
+    email : "",
+    pfp : "",
+    friends : [],
+    notifications : 0,
+    pendingRequests : []
+  }
+})
+// export const updateUnreadMessageCount = (friendId : number, action : "increment" | "reset") => {
+//   const setUserData = useSetRecoilState(userData);
+
+//   setUserData((prevUserData) => ({
+//     ...prevUserData,
+//     friends: prevUserData.friends.map((friend) => {
+//       if (friend.id === friendId && action === "increment") {
+//         return 
+//       }
+//       else {
+//         return {
+//           ...friend,
+//           unreadMessageCount: undreadmsgcount*0
+//         };
+//       }
+//       return friend;
+//     })
+//   }));
+// };
 export const refetchFriends = atom({
   key: 'refetchFriends',
   default: false,

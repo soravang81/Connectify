@@ -1,8 +1,8 @@
 import { Socket } from "socket.io"
 import { Sockets } from "./user-socket";
-import { io, redis } from "./server";
+import { io, redis } from "../server";
 import { v4 }  from "uuid";
-import { getRequestdetails, getSocketId, getUserdetails } from "./lib/functions";
+import { getRequestdetails, getSocketId, getUserdetails } from "../lib/functions";
 
 
 interface requests{
@@ -14,6 +14,7 @@ interface dataprop{
   message : string;
   sid : number;
   rid : number;
+  seen? : boolean
 }
 
 export const sendRequest = async (socket : Socket , data:requests)=>{

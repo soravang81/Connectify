@@ -1,7 +1,7 @@
-import { io } from "./server";
-import { joinRoomHandler, messageHandler } from "./socketHandlers"
+import { io } from "../server";
+import { joinRoomHandler, messageHandler } from "./handlers"
 import { Sockets, removeSocket, userSocket } from "./user-socket";
-import { sendRequest } from "./socketHandlers";
+import { sendRequest } from "./handlers";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")
