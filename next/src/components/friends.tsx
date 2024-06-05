@@ -69,7 +69,7 @@ export const FriendsList = () => {
   return (
     <Container className="overflow-hidden hover:overflow-auto h-[75vh] w-full ">
       <h2 className="text-2xl">Friends List</h2><br/>
-      {/* <ul> */}
+        <div className="flex flex-col gap-2">
         {userdata.friends !==null && userdata.friends.map((friend) =>{
           if(friend){
             return ( // change the key to the recent chat ...later
@@ -87,7 +87,7 @@ export const FriendsList = () => {
             )
           }
         })}
-      {/* </ul> */}
+        </div>
     </Container>
   );
 };

@@ -12,6 +12,7 @@ import { useRecoilState } from "recoil";
 export default function Home(){
   const [userDataState, setUserData] = useRecoilState(userData);
   useEffect(()=>{
+    connect()
     socket.on("message" , (data)=>{
       //todo toast of the messages
       if(window.location.pathname === "/"){
@@ -20,20 +21,20 @@ export default function Home(){
             {console.log(friend.unreadMessageCount)
               return(
                 friend.id === data.sid
-              ? { ...friend, unreadMessageCount : friend.unreadMessageCount +0.5 }
+              ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
               : friend
-              )//todo fix rerender here and +0.5 to +1
+              )
             }
           );
           return { ...prevUserData, friends: updatedFriends };
         });
       }
     })
-  connect()
   return (()=>{
     socket.disconnect()
+    socket.off("message")
   })
-  },[socket])
+  },[])
   
     return(
       <Container className="flex flex-col min-w-screen min-h-[92.9vh] mb-0">

@@ -2,7 +2,8 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import { createClient } from 'redis';
+// import { createClient } from 'redis';
+import Redis from 'ioredis';
 import cors from "cors"
 import user from './routes/user/user';
 import admin from './routes/admin/admin';
@@ -10,7 +11,8 @@ import admin from './routes/admin/admin';
 dotenv.config(); 
 
 export const app = express();
-export const redis = createClient();
+// export const redis = createClient();
+export const redis = new Redis();
 const httpServer = createServer(app);
 const router = express.Router();
 
@@ -33,12 +35,14 @@ export const io = new Server(httpServer, {
 
 export async function startServer() {
     try {
-      await redis.connect();
+      // redis.disconnect()
+      // await redis.connect();
       console.log("Connected to Redis");
   
       httpServer.listen(port, () => {
         console.log(`Server is running on port ${port}`);
       });
+      
       
     } catch (error) {
         console.error("Failed to connect to Redis", error);

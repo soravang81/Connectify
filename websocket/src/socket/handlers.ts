@@ -1,8 +1,6 @@
 import { Socket } from "socket.io"
-import { Sockets } from "./user-socket";
-import { io, redis } from "../server";
-import { v4 }  from "uuid";
 import { getRequestdetails, getSocketId, getUserdetails } from "../lib/functions";
+import { redis } from "../server";
 
 
 interface requests{
@@ -14,7 +12,7 @@ interface dataprop{
   message : string;
   sid : number;
   rid : number;
-  seen? : boolean
+  time : Date
 }
 
 export const sendRequest = async (socket : Socket , data:requests)=>{
@@ -32,13 +30,22 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
 export const messageHandler = async( socket: Socket ,data :dataprop) => {
   console.log("Received message:", data);
   const receiverSocket = await getSocketId(data.rid)
+  // if receiver socket is not available then send messages on mount to that user
   console.log("receiver socket : ",receiverSocket)
   if(receiverSocket){
-    socket.to(receiverSocket).emit("message" , {
+    const message = {
       message : data.message,
       sid : data.sid,
-      rid : data.rid
-    })
+      rid : data.rid,
+      time : data.time
+    }
+    try{
+      socket.to(receiverSocket).emit("message" , message)
+      redis.set("chat" , JSON.stringify(message))
+    }
+    catch(err){
+      console.log("cant set :-------->>>>>>>>>" , err)
+    }
     //redis upload message -> then to database
   }
 }

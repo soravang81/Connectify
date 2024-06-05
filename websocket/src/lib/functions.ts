@@ -1,4 +1,5 @@
 import prisma from "../../db/db"
+import { redis } from "../server";
 import { Sockets } from "../socket/user-socket"
 import * as crypto from 'crypto';
 import dotenv from "dotenv"
@@ -52,6 +53,29 @@ export const getUserId = async (socketId : string) =>{
         }
         else return
     })
+}
+export const saveRedisChatToDatabase = async()=>{
+    redis.exists("chat" , async(err , res)=>{
+        const chat = await (redis.get("chat"))
+        if(res === 1 && typeof chat!== null && typeof chat== "string"){
+            try{
+                const data = JSON.parse(chat)
+                await prisma.chat.create({
+                    data : {
+                        message : data.message,
+                        senderId : data.sid,
+                        receiverId : data.rid,
+                        time : data.time
+                    }
+                })
+                redis.del("chat")
+            }
+            catch(error){
+                console.error("error uploading chat to db " , error)
+            }
+        } 
+    })
+    
 }
 
 export const encrypt = (str: string): string => {

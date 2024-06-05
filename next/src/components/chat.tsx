@@ -22,7 +22,6 @@ interface sentMessage{
   sid : number,
   rid : number,
   time : Date;
-  seen : boolean
 }
 interface messages {
   message : string,
@@ -51,14 +50,26 @@ export const ChatSection = ()=>{
           const urlParts = currentUrl.split('/');
           const rid = parseInt(urlParts[urlParts.length - 1])
           setCurrentUrl(rid);
-          console.log(rid)
         }
       };
       fetchCurrentUrl();
       setRefetchUserData(!refetchUserData)
-      
+      // receive message
+      socket.on("message", (data) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            message: data.message,
+            type: "received",
+            time: new Date(),
+          },
+        ]);
+      });
+      return () => {
+        socket.off("message");
+      };
     }, []);
-    //sendmessage
+    //send message
     const sendMessageHandler = () => {
       if(session?.user.id && message!==""){
         const newMessage : sentMessage= {
@@ -66,27 +77,17 @@ export const ChatSection = ()=>{
           sid : session?.user.id,
           rid : rid,
           time : new Date(),
-          seen : false
         }
         sendMessage(newMessage)
         setMessages([...messages , {
           message : message,
           type : "sent" ,
-          time : new Date()
+          time : newMessage.time
         }])
         setMessage("");
-        console.log("msg sent")
       }
     };
-    socket.on("message" , (data) => {
-      console.log(userdata.friends)
-      setMessages([...messages , {
-        message : data.message,
-        type : "received" ,
-        time : new Date()
-      }])
-    }
-  );
+    
     const scrollToBottom = () => {
       if (msgbox.current) {
           msgbox.current.scrollTop = msgbox.current.scrollHeight;
@@ -98,7 +99,6 @@ export const ChatSection = ()=>{
 
     return (
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 
-        {/* {mount &&  */}
         <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col">
             {messages.map((msg, index)=>{
               return(
@@ -107,7 +107,6 @@ export const ChatSection = ()=>{
             })}
             <div ref={bottom}></div>
         </div>
-        {/* } */}
         <form className="flex gap-6" onSubmit={(e)=>e.preventDefault()}>
             <Input
             className="lg:py-7 py-5 text-xl"
