@@ -2,11 +2,6 @@ import { NextFunction, Request, Response , RequestParamHandler } from "express";
 import prisma from "../../db/db";
 import { redis } from "../server";
 
-export interface requestt extends Request{
-    sid : number,
-    rid : number,
-    data : any[]
-}
 
 export const saveRedisChatToDatabase = async()=>{
     redis.exists("chat" , async(err , res)=>{
@@ -42,18 +37,19 @@ export const cachedChat = async( req :any , res: Response , next :NextFunction )
             
             redis.exists( key , async(err , rep)=>{
                 if (err) {
-                    console.error("Redis error:", err);
-                    res.status(500).send("Server error");
-                    return;
+                    console.log("Redis error:", err);
+                    req.error = `Redis exists error ${err}` 
+                    next()
                 }
                 if(rep === 1){
-                    await redis.get(`user${sid}` , (err , data)=>{
+                    console.log("inside rep -1")
+                    await redis.get(key , (err , data)=>{
                         if (err) {
-                            console.error("Redis get error:", err);
-                            res.status(500).send("Server error");
-                            return;
+                            req.error = `Redis get error ${err}` 
+                            next()
                         }
                         if(typeof data ==="string"){
+                            console.log("from redis")
                             req.data = JSON.parse(data);
                             next();
                         }
@@ -61,35 +57,46 @@ export const cachedChat = async( req :any , res: Response , next :NextFunction )
                     })
                 }
                 else{
-                    const chat = await prisma.chat.findMany({
-                        where : {
-                            AND: [
-                                { senderId: sid, receiverId: rid },
-                                { senderId: rid, receiverId: sid }
-                            ]
-                        }
-                    })
-                    if(chat.length > 0){
-                        redis.set(key, JSON.stringify(chat), 'EX', 60 * 15, (err) => {
-                            if (err) {
-                                console.error("Redis set error:", err);
-                                res.status(500).send("Server error");
-                                return;
+                    try{
+                        const chat = await prisma.chat.findMany({
+                            where : {
+                                AND : {
+                                    senderId: sid,
+                                    receiverId: rid
+                                }
                             }
-                            req.data = chat;
-                            next();
-                        });
+                        })
+                        console.log(chat)
+                        if(chat.length > 0){
+                            redis.set(key, JSON.stringify(chat), 'EX', 60 * 15, (err) => {
+                                if (err) {  
+                                    console.log(err)           
+                                    req.error = "redis set error"
+                                    next()
+                                }
+                                console.log("from prisma")
+                                req.data = chat;
+                                next();
+                            });
+                        }
+                        else{
+                            req.data = []               
+                            req.error = "no chat found"
+                            next()
+                        }
                     }
-                    else{
-                        req.data = []               
-                        console.error("no chat found")
+                    catch(error){
+                        console.log(error)
+                        req.error = ("error in prisma request")
+                        next()
                     }
                 }
             })
         }
     }
     catch(error){
-        console.error("Error in middleware:", error);
-        res.status(500).send("Server error");
+        console.log("Error in middleware:", error);
+        req.error = error;
+        next()
     }
 }

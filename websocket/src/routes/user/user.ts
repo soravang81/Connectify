@@ -3,11 +3,13 @@ import profile from "./profile/profile"
 import request from './requests/requests';
 import prisma from '../../../db/db';
 import cors from 'cors';
+import chat from './chat/chat';
 
 const user = express.Router();
 user.use(cors())
 user.use('/profile', profile);
 user.use('/request', request);
+user.use('/chat', chat);
 
 interface props {
     id :  number

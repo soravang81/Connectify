@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { mountMsgBox,  refetchUserData,  undreadmsgcount,  userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import { Msgbox } from "./msgbox";
+import axios from "axios";
 
 interface receivedMessage{
   message : string;
@@ -33,14 +34,18 @@ export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
     const [notprocessed, setnotProcessed] = useState<boolean>(true);
     const [messages, setMessages] = useState<messages[]>([]);
-    const { data: session } = useSession();
+    const { data: session , status } = useSession();
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
     const [userdata , setUserData] = useRecoilState(userData);
     const [rid, setCurrentUrl] = useState(0);
     const [mount , setMount] = useRecoilState(mountMsgBox)
     const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
-    // console.log(notprocessed)
+    const url = process.env.NEXT_PUBLIC_SOCKET_URL;
+
+    const currentUrl = window.location.href;
+    const urlParts = currentUrl.split('/');
+    const ridd = parseInt(urlParts[urlParts.length - 1])
     // todo : fetch old messages from server on refresh
     useEffect(() => {
       setMount(true)
@@ -96,6 +101,24 @@ export const ChatSection = ()=>{
     useEffect(() => {
       scrollToBottom();
     },[messages]);
+
+
+    const getData = async()=>{
+      if(status === "authenticated"){
+        const res = await axios.get(url +`/user/chat` , {
+          params : {
+            sid : session?.user.id,
+            rid : rid,
+          }
+        })
+        console.log(res.data)
+      }
+    }
+    useEffect(()=>{
+      if(session?.user.id && status === "authenticated" && typeof rid === "number" && !Number.isNaN(rid) && rid !== 0){
+        getData()
+      }
+    },[status , rid])
 
     return (
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 

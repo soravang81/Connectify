@@ -1,17 +1,31 @@
 import express, { Request, Response } from 'express';
-import { cachedChat, requestt } from '../../../lib/redis';
+import { cachedChat } from '../../../redis/redis';
 
 const chat = express.Router();
 
-const send = (req :any, res: Response):void => {
+// const send = (req :any, res: Response):void => {
+//     const chat = req.data;
+//     if (chat) {
+//         res.json(chat);
+//     } else {
+//         res.send("No chat data available");
+//     }
+// }
+
+chat.get('/', cachedChat , (req :any, res: Response):void => {
     const chat = req.data;
-    if (chat) {
+    const error = req.error
+    
+    if (req.data) {
         res.json(chat);
-    } else {
+    }
+    else if(req.error){
+        res.json(error)
+    }
+    else {
         res.send("No chat data available");
     }
-}
-
-chat.get('/', cachedChat , send)
+    
+})
 
 export default chat;

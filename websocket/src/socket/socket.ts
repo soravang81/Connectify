@@ -2,7 +2,7 @@ import { io } from "../server";
 import { joinRoomHandler, messageHandler } from "./handlers"
 import { Sockets, removeSocket, userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
-import { saveRedisChatToDatabase } from "../lib/redis";
+import { saveRedisChatToDatabase } from "../redis/redis";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")

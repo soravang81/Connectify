@@ -54,7 +54,8 @@ export const FriendsList = () => {
     const uid = encrypt(rid.toString())
     console.log(uid)
     router.push(`/chat/${uid}`)
-    setUserData((prevUserData) => {//to remove the current notification count when entered chat with user , this is not ai genreated :P
+    setUserData((prevUserData) => {//to remove the current notification count when 
+      //entered chat with user , this is not ai genreated :P
       const updatedFriends = prevUserData.friends.map((friend) => {
         if (friend.id === rid) {
           return { ...friend, unreadMessageCount: 0 };

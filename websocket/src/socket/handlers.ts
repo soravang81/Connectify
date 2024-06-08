@@ -21,7 +21,6 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
     const receiverSocket = await getSocketId(res.receiverId)
     if(receiverSocket){
       socket.to(receiverSocket).emit("RECEIVED_REQUEST"
-      // redis.
     )
     }
   }
