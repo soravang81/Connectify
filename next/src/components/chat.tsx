@@ -8,9 +8,8 @@ import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { Send } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { mountMsgBox,  refetchUserData,  undreadmsgcount,  userData } from "../utils/recoil/state";
+import { mountMsgBox,  refetchUserData, userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
-import { Msgbox } from "./msgbox";
 import axios from "axios";
 
 interface receivedMessage{
@@ -32,12 +31,10 @@ interface messages {
 
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
-    const [notprocessed, setnotProcessed] = useState<boolean>(true);
     const [messages, setMessages] = useState<messages[]>([]);
     const { data: session , status } = useSession();
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
-    const [userdata , setUserData] = useRecoilState(userData);
     const [rid, setCurrentUrl] = useState(0);
     const [mount , setMount] = useRecoilState(mountMsgBox)
     const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
@@ -46,7 +43,7 @@ export const ChatSection = ()=>{
     const currentUrl = window.location.href;
     const urlParts = currentUrl.split('/');
     const ridd = parseInt(urlParts[urlParts.length - 1])
-    // todo : fetch old messages from server on refresh
+    
     useEffect(() => {
       setMount(true)
       const fetchCurrentUrl = async () => {
@@ -102,7 +99,7 @@ export const ChatSection = ()=>{
       scrollToBottom();
     },[messages]);
 
-
+    //old chat
     const getData = async()=>{
       if(status === "authenticated"){
         const res = await axios.get(url +`/user/chat` , {
@@ -112,6 +109,24 @@ export const ChatSection = ()=>{
           }
         })
         console.log(res.data)
+        if(res.data.length > 0){
+          res.data.map((msg:any)=>{
+            msg.senderId === session?.user.id
+            ? setMessages((prevmsg)=>[
+              ...prevmsg , {
+                message : msg.message,
+                type : "sent",
+                time : new Date(msg.time)
+              }
+            ])
+            : setMessages((prevmsg)=>[
+             ...prevmsg , {
+              message : msg.message,
+              type : "received",
+              time : new Date(msg.time)
+             }])
+          })
+        }
       }
     }
     useEffect(()=>{
@@ -124,6 +139,7 @@ export const ChatSection = ()=>{
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 
         <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col">
             {messages.map((msg, index)=>{
+              console.log(msg)
               return(
                 <p key={index} className={`text-2xl border w-fit p-1 border-foreground rounded-lg ${msg.type === "sent"? "self-end" : ""}`}>{msg.message} <span className="text-xs">{msg.time.toLocaleTimeString()}</span></p>
               )

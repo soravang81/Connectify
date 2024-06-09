@@ -21,14 +21,14 @@ export const SocketConnections = ()=>{
         socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
 
         socket.on('message', (data) => messageHandler(socket, data));
-        try {
-          setInterval(() => {
-            saveRedisChatToDatabase();
-          }, 5000);
-        }
-        catch{
-          console.error("error saving chat to db")
-        } // save redis data to db every seconds if chat exists
+        // try {
+        //   setInterval(() => {
+        //     saveRedisChatToDatabase();
+        //   }, 3000);
+        // }
+        // catch{
+        //   console.error("error saving chat to db")
+        // } // save redis data to db every seconds if chat exists
         
         socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
         

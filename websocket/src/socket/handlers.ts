@@ -1,6 +1,7 @@
 import { Socket } from "socket.io"
 import { getRequestdetails, getSocketId, getUserdetails } from "../lib/functions";
 import { redis } from "../server";
+import { saveRedisChatToDatabase } from "../redis/redis";
 
 
 interface requests{
@@ -31,21 +32,40 @@ export const messageHandler = async( socket: Socket ,data :dataprop) => {
   const receiverSocket = await getSocketId(data.rid)
   // if receiver socket is not available then send messages on mount to that user
   console.log("receiver socket : ",receiverSocket)
+  const key = `user:${data.sid}:${data.rid}`;
+  const reversekey = `user:${data.rid}:${data.sid}`;
   if(receiverSocket){
     const message = {
       message : data.message,
-      sid : data.sid,
-      rid : data.rid,
-      time : data.time
+      senderId : data.sid,
+      receiverId : data.rid,
+      time : data.time 
     }
     try{
       socket.to(receiverSocket).emit("message" , message)
-      redis.set("chat" , JSON.stringify(message))
+        const keyy = await redis.exists(key)
+        const reversekeyy = await redis.exists(reversekey)
+        let newKey = "";
+
+        await redis.exists(key) ? newKey = key : newKey = reversekey
+        if(!keyy && !reversekeyy){
+          redis.set(key , JSON.stringify([message]))
+          console.log(key)
+          saveRedisChatToDatabase(key)
+        }
+        
+        const prevData = await redis.get(newKey)
+        console.log("prevData ",prevData)
+        if(typeof prevData === "string"){
+          const data = JSON.parse(prevData)
+          data.push(message)
+          redis.set(newKey , JSON.stringify(data))
+          saveRedisChatToDatabase(newKey)
+        }
     }
     catch(err){
-      console.log("cant set :-------->>>>>>>>>" , err)
+      console.log("message handler error : " , err)
     }
-    //redis upload message -> then to database
   }
 }
 

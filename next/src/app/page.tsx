@@ -12,6 +12,7 @@ import { useRecoilState } from "recoil";
 export default function Home(){
   const [userDataState, setUserData] = useRecoilState(userData);
   useEffect(()=>{
+    console.log("home render")
     connect()
     socket.on("message" , (data)=>{
       //todo toast of the messages
