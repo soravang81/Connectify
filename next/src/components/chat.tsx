@@ -8,22 +8,17 @@ import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { Send } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { mountMsgBox,  refetchUserData, userData } from "../utils/recoil/state";
+import { mountMsgBox,  refetchUserData, } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import axios from "axios";
 
-interface receivedMessage{
-  message : string;
-  sid : number;
-  time : Date;
-}
 interface sentMessage{
   message : string,
   sid : number,
   rid : number,
   time : Date;
 }
-interface messages {
+export interface messagesprop {
   message : string,
   type : "sent" | "received"
   time : Date
@@ -31,7 +26,7 @@ interface messages {
 
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
-    const [messages, setMessages] = useState<messages[]>([]);
+    const [messages, setMessages] = useState<messagesprop[]>([]);
     const { data: session , status } = useSession();
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
@@ -58,14 +53,12 @@ export const ChatSection = ()=>{
       setRefetchUserData(!refetchUserData)
       // receive message
       socket.on("message", (data) => {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            message: data.message,
-            type: "received",
-            time: new Date(),
-          },
-        ]);
+        const newMessage: messagesprop = {
+          message: data.message,
+          type: 'received',
+          time: new Date(),
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
       return () => {
         socket.off("message");
@@ -77,7 +70,7 @@ export const ChatSection = ()=>{
         const newMessage : sentMessage= {
           message : message,
           sid : session?.user.id,
-          rid : rid,
+          rid : ridd,
           time : new Date(),
         }
         sendMessage(newMessage)
@@ -87,6 +80,10 @@ export const ChatSection = ()=>{
           time : newMessage.time
         }])
         setMessage("");
+        socket.emit("UNREAD_MSG" , {
+          senderId : session?.user.id,
+          receiverId : ridd, 
+        })
       }
     };
     

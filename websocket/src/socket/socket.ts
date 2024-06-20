@@ -1,5 +1,5 @@
 import { io } from "../server";
-import { joinRoomHandler, messageHandler } from "./handlers"
+import { joinRoomHandler, messageHandler, unreadMessage } from "./handlers"
 import { Sockets, removeSocket, userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
@@ -21,14 +21,8 @@ export const SocketConnections = ()=>{
         socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
 
         socket.on('message', (data) => messageHandler(socket, data));
-        // try {
-        //   setInterval(() => {
-        //     saveRedisChatToDatabase();
-        //   }, 3000);
-        // }
-        // catch{
-        //   console.error("error saving chat to db")
-        // } // save redis data to db every seconds if chat exists
+        
+        socket.on('UNREAD_MSG', (data) => unreadMessage(socket, data));
         
         socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
         

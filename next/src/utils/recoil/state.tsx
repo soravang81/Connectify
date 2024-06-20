@@ -62,25 +62,7 @@ export const userData = atom<UserData>({
     pendingRequests : []
   }
 })
-// export const updateUnreadMessageCount = (friendId : number, action : "increment" | "reset") => {
-//   const setUserData = useSetRecoilState(userData);
 
-//   setUserData((prevUserData) => ({
-//     ...prevUserData,
-//     friends: prevUserData.friends.map((friend) => {
-//       if (friend.id === friendId && action === "increment") {
-//         return 
-//       }
-//       else {
-//         return {
-//           ...friend,
-//           unreadMessageCount: undreadmsgcount*0
-//         };
-//       }
-//       return friend;
-//     })
-//   }));
-// };
 export const refetchFriends = atom({
   key: 'refetchFriends',
   default: false,

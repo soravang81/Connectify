@@ -1,18 +1,37 @@
 import axios from "axios"
 import { useSession } from "next-auth/react"
-import { useRecoilState } from "recoil";
-import { userData } from "../recoil/state";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { promise } from "zod";
 import { useEffect } from "react";
+const url = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 
-export function useFetchData() {
-    return async () => {
-        const { data: session } = useSession();
-        const [userDataState, setUserData] = useRecoilState(userData);
 
-        useEffect(() => {
-             // Call the fetchData function when the component mounts
-        }, [session, setUserData]); // Dependency array includes session and setUserData
-    };
-}
+// export const getOldChat = async(sid : number,rid : number)=>{
+//     const setMessages = useSetRecoilState(allMessages);
+//     const res = await axios.get(url +`/user/chat` , {
+//       params : {
+//         sid,
+//         rid 
+//       }
+//     })
+//     console.log(res.data)
+//     if(res.data.length > 0){
+//       res.data.map((msg:any)=>{
+//         msg.senderId === sid
+//         ? setMessages((prevmsg:any)=>[
+//           ...prevmsg , {
+//             message : msg.message,
+//             type : "sent",
+//             time : new Date(msg.time)
+//           }
+//         ])
+//         : setMessages((prevmsg:any)=>[
+//          ...prevmsg , {
+//           message : msg.message,
+//           type : "received",
+//           time : new Date(msg.time)
+//          }])
+//       })
+//     }
+//   }

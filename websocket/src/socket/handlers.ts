@@ -15,6 +15,25 @@ interface dataprop{
   rid : number;
   time : Date
 }
+export interface UserData {
+  id: number;
+  username: string;
+  email: string;
+  pfp: string;
+  friends: {
+    id: number;
+    username: string;
+    pfp: string;
+    unreadMessageCount: number;
+  }[];
+  notifications: number;
+  pendingRequests: {
+    id: number;
+    username: string;
+    pfp: string;
+    createdAt: string;
+  }[];
+}
 
 export const sendRequest = async (socket : Socket , data:requests)=>{
   const res = await getRequestdetails({senderId : data.senderId})
@@ -30,42 +49,43 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
 export const messageHandler = async( socket: Socket ,data :dataprop) => {
   console.log("Received message:", data);
   const receiverSocket = await getSocketId(data.rid)
-  // if receiver socket is not available then send messages on mount to that user
   console.log("receiver socket : ",receiverSocket)
   const key = `user:${data.sid}:${data.rid}`;
   const reversekey = `user:${data.rid}:${data.sid}`;
-  if(receiverSocket){
-    const message = {
-      message : data.message,
-      senderId : data.sid,
-      receiverId : data.rid,
-      time : data.time 
-    }
-    try{
+  const message = {
+    message : data.message,
+    senderId : data.sid,
+    receiverId : data.rid,
+    time : data.time 
+  }
+  try{
+    if(receiverSocket){
       socket.to(receiverSocket).emit("message" , message)
-        const keyy = await redis.exists(key)
-        const reversekeyy = await redis.exists(reversekey)
-        let newKey = "";
-
-        await redis.exists(key) ? newKey = key : newKey = reversekey
-        if(!keyy && !reversekeyy){
-          redis.set(key , JSON.stringify([message]))
-          console.log(key)
-          saveRedisChatToDatabase(key)
-        }
-        
-        const prevData = await redis.get(newKey)
-        console.log("prevData ",prevData)
-        if(typeof prevData === "string"){
-          const data = JSON.parse(prevData)
-          data.push(message)
-          redis.set(newKey , JSON.stringify(data))
-          saveRedisChatToDatabase(newKey)
-        }
     }
-    catch(err){
-      console.log("message handler error : " , err)
+    else{
+      //send message on when reciever mounts
     }
+    const keyy = await redis.exists(key)
+    const reversekeyy = await redis.exists(reversekey)
+    let newKey = "";
+    await redis.exists(key) ? newKey = key : newKey = reversekey
+    if(!keyy && !reversekeyy){
+      redis.set(key , JSON.stringify([message]))
+      console.log(key)
+      saveRedisChatToDatabase(key)
+    }
+    
+    const prevData = await redis.get(newKey)
+    console.log("prevData ",prevData)
+    if(typeof prevData === "string"){
+      const data = JSON.parse(prevData)
+      data.push(message)
+      redis.set(newKey , JSON.stringify(data))
+      saveRedisChatToDatabase(newKey)
+    }
+  }
+  catch(err){
+    console.log("message handler error : " , err)
   }
 }
 
@@ -81,7 +101,38 @@ export const leaveRoomHandler = (socket: Socket, data: { room : string }): void 
   console.log("User left room:", data.room);
 };
 
-export const customEventHandler = (socket: Socket, data?: any): void => {
-  console.log("Received custom event:", data);
-  // Handle custom event
+export const unreadMessage = async (socket: Socket, data?: any): Promise<void> => {
+  if (!data || !data.senderId || !data.receiverId) {
+    console.error('Invalid data');
+    return;
+  }
+
+  const key = `data:${data.receiverId}`;
+  
+  try {
+    const receiverSocket = await getSocketId(data.receiverId)
+    receiverSocket ? socket.to(receiverSocket).emit("UNREAD_MSG" , {
+      senderId : data.senderId,
+      receiverId : data.receiverId
+    }):null;
+    const userDataStr = await redis.get(key);
+    if (!userDataStr) {
+      console.error('User data not found');
+      return;
+    }
+
+    const userData: UserData = JSON.parse(userDataStr);
+
+    const friend = userData.friends.find(friend => friend.id === data.senderId);
+    if (friend) {
+      friend.unreadMessageCount += 1;
+      await redis.set(key, JSON.stringify(userData));
+    }
+    else {
+      console.error('Friend not found');
+    }
+  }
+  catch (error) {
+    console.error('Error updating unread message count:', error);
+  }
 };

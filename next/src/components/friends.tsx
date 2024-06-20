@@ -7,7 +7,7 @@ import { Container } from "./container";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { encrypt } from "../utils/functions/lib";
 import { useRouter } from "next/navigation";
-import { FriendList, friendsFetched, mountMsgBox, refetchFriends, userData } from "../utils/recoil/state";
+import { friendsFetched, mountMsgBox, refetchFriends, userData } from "../utils/recoil/state";
 import { socket } from "../utils/socket/io";
 import { Badge } from "./ui/badge";
 
@@ -27,6 +27,7 @@ export const FriendsList = () => {
   const [mount , setMount] = useRecoilState(mountMsgBox)
   const url = process.env.NEXT_PUBLIC_SOCKET_URL;
 
+  console.log(userdata.friends)
   const getFriends = async () => {
     if(session?.user.id && friendsfetched !== true) {
       try {
@@ -38,7 +39,8 @@ export const FriendsList = () => {
           });
         }
         setFriendsFetched(true)
-      } catch (error) {
+      }
+      catch (error) {
         console.error("Error fetching friends:", error);
       }
     }
@@ -72,6 +74,7 @@ export const FriendsList = () => {
       <h2 className="text-2xl">Friends List</h2><br/>
         <div className="flex flex-col gap-2">
         {userdata.friends !==null && userdata.friends.map((friend) =>{
+          console.log(friend)
           if(friend){
             return ( // change the key to the recent chat ...later
               <Card key={friend.id} className="rounded-2xl border-slate-600 border-2 flex gap-4 px-1 py-1 hover:cursor-pointer" onClick={(e)=>handleClick(friend.id)}>

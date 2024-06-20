@@ -5,35 +5,59 @@ import Navbar from "../components/navbar";
 import { FriendsList } from "../components/friends";
 import { useEffect  } from "react";
 import { connect, socket } from "../utils/socket/io";
-import { userData } from "../utils/recoil/state";
+import { refetchUserData, userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 
 
 export default function Home(){
   const [userDataState, setUserData] = useRecoilState(userData);
+  const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
+
   useEffect(()=>{
     console.log("home render")
     connect()
     socket.on("message" , (data)=>{
       //todo toast of the messages
+      // if(window.location.pathname === "/"){
+      //   setUserData((prevUserData) => {
+      //     const updatedFriends = prevUserData.friends.map((friend) =>
+      //       {console.log(friend.unreadMessageCount);
+      //       console.log(friend.id , data.senderId)
+      //         return(
+      //           friend.id === data.senderId
+      //         ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
+      //         : friend
+      //         )
+      //       }
+      //     );
+      //     return { ...prevUserData, friends: updatedFriends };
+      //   });
+      // }
+      
+    })
+    socket.on("UNREAD_MSG" , (data)=> {
+      console.log("received event " , data)
       if(window.location.pathname === "/"){
-        setUserData((prevUserData) => {
-          const updatedFriends = prevUserData.friends.map((friend) =>
-            {console.log(friend.unreadMessageCount)
-              return(
-                friend.id === data.sid
-              ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
-              : friend
-              )
-            }
-          );
-          return { ...prevUserData, friends: updatedFriends };
-        });
-      }
+          setUserData((prevUserData) => {
+            const updatedFriends = prevUserData.friends.map((friend) =>
+              {console.log(friend.unreadMessageCount);
+              console.log(friend.id , data.senderId)
+                return(
+                  friend.id === data.senderId
+                ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
+                : friend
+                )
+              }
+            );
+            return { ...prevUserData, friends: updatedFriends };
+          });
+        }
+      setRefetchUserData(!refetchUserData)
     })
   return (()=>{
     socket.disconnect()
     socket.off("message")
+    socket.off("UNREAD_MSG")
   })
   },[])
   

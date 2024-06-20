@@ -44,7 +44,8 @@ model Chat {
   senderId            Int
   receiverId          Int
   message             String
-  time                DateTime 
+  time                DateTime
+  seen                Boolean             @default(false)
 }
 model Group {
   id                  Int                 @id @default(autoincrement())
@@ -60,6 +61,7 @@ model Groupchat {
   senderId            Int
   members             Int[]
   message             Int
+  seenBy              Int[]               @default([])
   time                DateTime
   group               Group                @relation(fields: [groupId] ,references: [id])
 }

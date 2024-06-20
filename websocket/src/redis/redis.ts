@@ -18,11 +18,12 @@ export const saveRedisChatToDatabase = async(key:string)=>{
             try{
                 const data = JSON.parse(chat)
                 const latestMsg = data[data.length - 1];
+                console.log(latestMsg)
                 await prisma.chat.create({
                     data: {
                       message: latestMsg.message,
-                      senderId: latestMsg.sid,
-                      receiverId: latestMsg.rid,
+                      senderId: latestMsg.senderId,
+                      receiverId: latestMsg.receiverId,
                       time: latestMsg.time,
                     },
                   });
