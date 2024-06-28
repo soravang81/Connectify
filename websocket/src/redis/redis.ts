@@ -46,18 +46,18 @@ export const cachedChat = async( req :any , res: Response , next :NextFunction )
         if(typeof senderId === "string" && typeof receiverId === "string"){
             const sid = parseInt(senderId);
             const rid = parseInt(receiverId);
-            const key = `user:${sid}:${rid}`;
-            const reversedKey = `user:${rid}:${sid}`;
+            const key = `chat:${sid}:${rid}`;
+            const reversedKey = `chat:${rid}:${sid}`;
             
             redis.exists( key , async(err , rep)=>{
-                console.log("inside 1st")
+                // console.log("inside 1st")
                 if (err) {
                     console.log("Redis error:", err);
                     req.error = `Redis exists error ${err}` 
                     next()
                 }
                 if(rep === 1){
-                    console.log("inside rep -1")
+                    // console.log("inside rep -1")
                     await redis.get(key , (err , data)=>{
                         if (err) {
                             req.error = `Redis get error ${err}` 

@@ -1,10 +1,10 @@
 "use client"
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { SignupSchema } from "@/src/utils/zod/schema";
-import { connect } from "@/src/utils/socket/io";
+import { connect, socket } from "@/src/utils/socket/io";
 
 
 
@@ -14,8 +14,19 @@ export default function SignupComp() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
+  const { data: session , status } = useSession();
 
   const router = useRouter();
+
+  // useEffect(()=>{
+  //   socket.disconnect()
+
+  //   return(()=>{
+  //     if(!socket.connected){
+  //       connect()
+  //     }
+  //   })
+  // },[])
   
   const handleClick = async (e:FormEvent) => {
     e.preventDefault()
@@ -39,9 +50,8 @@ export default function SignupComp() {
         });
         
         if (res?.ok) {
-        await connect() 
-        console.log("Signup successful");
-        router.push("/");
+          console.log("Signup successful");
+          router.push("/");
         }
         else{
           console.error("Signup failed");

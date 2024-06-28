@@ -4,8 +4,11 @@ import request from './requests/requests';
 import prisma from '../../../db/db';
 import cors from 'cors';
 import chat from './chat/chat';
+import { redis } from '../../server';
+import { UserData } from '../../socket/handlers/userdata';
 
 const user = express.Router();
+user.use(express.json())
 user.use(cors())
 user.use('/profile', profile);
 user.use('/request', request);
@@ -52,6 +55,20 @@ user.get("/friends" , async (req : Request<{}, {}, {}, props> , res) =>{
             }
         })
         if(friendsData){
+          const key = `data:${rid}`;
+          console.log(key)
+          const data = await redis.get(key)
+          if(data){
+            try{
+              const userData:UserData = JSON.parse(data)
+              userData.friends = updateddata as any
+              await redis.set(key , JSON.stringify(userData))
+              console.log("friends set successfully")
+            }
+            catch {
+              console.error("Error setting friends")
+            }
+          }
           return res.json({
             friend : updateddata
           })

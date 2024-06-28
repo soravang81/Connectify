@@ -1,10 +1,8 @@
 import express, { Request } from 'express';
 import { getUserdetails } from '../../../lib/functions';
 import prisma from '../../../../db/db';
-import cors from 'cors';
 
 const request = express.Router();
-request.use(cors())
 
 interface props {
   id :  number
@@ -49,7 +47,8 @@ request.get("/" , async (req :Request<{}, {}, {}, props> , res)=>{
 })
 
 request.post("/send" , async(req, res) => {
-  const {senderId , receiver ,roomId} = req.body;
+  console.log(req.body)
+  const {senderId , receiver } = req.body;
   const senderid = parseInt(senderId)
   const senderInfo = await getUserdetails(senderid)
   try{ //check if the receiver exist or not

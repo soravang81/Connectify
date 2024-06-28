@@ -7,8 +7,8 @@ import { sendMessage } from "@/src/utils/socket/socket";
 import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { Send } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { mountMsgBox,  refetchUserData, } from "../utils/recoil/state";
+import { getSession, useSession } from "next-auth/react";
+import { CurrentChatUserId,refetchUserData, } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import axios from "axios";
 
@@ -16,7 +16,7 @@ interface sentMessage{
   message : string,
   sid : number,
   rid : number,
-  time : Date;
+  time : Date
 }
 export interface messagesprop {
   message : string,
@@ -24,53 +24,73 @@ export interface messagesprop {
   time : Date
 }
 
+export type status = "ONLINE" | "ONCHAT" | "OFFLINE";
+
+export interface statuss {
+  sid : number
+  status : {
+    status : status
+    id? : number
+  }
+}
+export const fetchCurrentUrl = () => {
+  if (typeof window !== 'undefined') {
+    const currentUrl = window.location.href;
+    const urlParts = currentUrl.split('/');
+    const url = parseInt(urlParts[urlParts.length - 1])
+    console.log(url)
+    if(Number.isNaN(url)){
+      return 0
+    }
+    return url
+  }
+};
+
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
     const [messages, setMessages] = useState<messagesprop[]>([]);
-    const { data: session , status } = useSession();
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
-    const [rid, setCurrentUrl] = useState(0);
-    const [mount , setMount] = useRecoilState(mountMsgBox)
     const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
     const url = process.env.NEXT_PUBLIC_SOCKET_URL;
-
+    const sid = parseInt(sessionStorage.getItem("id")as string)
     const currentUrl = window.location.href;
     const urlParts = currentUrl.split('/');
     const ridd = parseInt(urlParts[urlParts.length - 1])
+    const [rid , setRid] = useRecoilState<number>(CurrentChatUserId)
     
     useEffect(() => {
-      setMount(true)
-      const fetchCurrentUrl = async () => {
-        if (typeof window !== 'undefined') {
-          const currentUrl = window.location.href;
-          const urlParts = currentUrl.split('/');
-          const rid = parseInt(urlParts[urlParts.length - 1])
-          setCurrentUrl(rid);
-        }
-      };
-      fetchCurrentUrl();
+      const url = fetchCurrentUrl()
+      setRid(url as number)
       setRefetchUserData(!refetchUserData)
+        const status : statuss =  {
+          sid ,
+          status : {
+            status : "ONCHAT",
+            id : rid
+          }
+        }
+      socket.emit("STATUS" , status)
       // receive message
-      socket.on("message", (data) => {
+      socket.on("DIRECT_MSG", (data) => {
         const newMessage: messagesprop = {
           message: data.message,
           type: 'received',
           time: new Date(),
-        };
+        };// fix , its not setting msg when online also get rid of unreadmsg smhw
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
       return () => {
-        socket.off("message");
+        socket.off("DIRECT_MSG");
       };
     }, []);
     //send message
     const sendMessageHandler = () => {
-      if(session?.user.id && message!==""){
+      if(sid && message!=="" && rid){
         const newMessage : sentMessage= {
           message : message,
-          sid : session?.user.id,
-          rid : ridd,
+          sid,
+          rid,
           time : new Date(),
         }
         sendMessage(newMessage)
@@ -81,8 +101,8 @@ export const ChatSection = ()=>{
         }])
         setMessage("");
         socket.emit("UNREAD_MSG" , {
-          senderId : session?.user.id,
-          receiverId : ridd, 
+          senderId : sid,
+          receiverId : rid, 
         })
       }
     };
@@ -98,17 +118,18 @@ export const ChatSection = ()=>{
 
     //old chat
     const getData = async()=>{
-      if(status === "authenticated"){
+      const session = await getSession();
+      if(session){
         const res = await axios.get(url +`/user/chat` , {
           params : {
-            sid : session?.user.id,
+            sid ,
             rid : rid,
           }
         })
         console.log(res.data)
         if(res.data.length > 0){
           res.data.map((msg:any)=>{
-            msg.senderId === session?.user.id
+            msg.senderId === sid
             ? setMessages((prevmsg)=>[
               ...prevmsg , {
                 message : msg.message,
@@ -127,10 +148,10 @@ export const ChatSection = ()=>{
       }
     }
     useEffect(()=>{
-      if(session?.user.id && status === "authenticated" && typeof rid === "number" && !Number.isNaN(rid) && rid !== 0){
+      if(sid  && !Number.isNaN(rid) && rid !== 0){
         getData()
       }
-    },[status , rid])
+    },[])
 
     return (
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 

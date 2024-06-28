@@ -1,4 +1,6 @@
+import { fetchCurrentUrl } from '@/src/components/chat';
 import { atom, useSetRecoilState } from 'recoil';
+import { socket } from '../socket/io';
 
 export const friendsFetched = atom({
   key: 'friendsFetched',
@@ -12,13 +14,9 @@ export const refetchUserData = atom({
   key: 'refetchUserData',
   default: false,
 });
-export const mountMsgBox = atom({
-  key: 'mountMsgBox',
-  default: false,
-});
-export const CurrentChatUserId = atom({
+export const CurrentChatUserId = atom<number>({
   key: 'CurrentChatUserId',
-  default: "",
+  default : fetchCurrentUrl()
 });
 interface friends{
   id : number,
@@ -43,13 +41,16 @@ export interface UserData {
   }[];
   notifications: number;
   pendingRequests: {
-    id: number;
-    username: string;
-    pfp: string;
+    user : {
+      id: number;
+      username: string;
+      pfp: string;
+    }
     createdAt: string;
   }[];
 }
 export let undreadmsgcount = 0
+
 export const userData = atom<UserData>({
   key: 'userData',
   default: {
@@ -62,7 +63,6 @@ export const userData = atom<UserData>({
     pendingRequests : []
   }
 })
-
 export const refetchFriends = atom({
   key: 'refetchFriends',
   default: false,

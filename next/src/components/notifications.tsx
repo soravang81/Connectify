@@ -22,7 +22,7 @@ interface props{
     username : string,
     pfp : string,
     createdAt : string
-  }
+}
 export const Notifications = ()=>{
     const {data : session,status} = useSession()
     // const [req , setRequests] = useState<props[]>([]);
@@ -35,6 +35,7 @@ export const Notifications = ()=>{
             fetchRequests()
             setNotiFetch(true)
         socket.on("RECEIVED_REQUEST" , (data:props)=>{
+            console.log("received")
             fetchRequests()
         })}       
     },[status])
@@ -44,9 +45,10 @@ export const Notifications = ()=>{
             const id = session?.user.id
             console.log(id)
             const res = await axios.get(url+`/user/request?id=${id}`)
-            if(res.data.request){
+            console.log(res)
+            if(res.data.request.length > 0){
                 setUserData({... userdata ,
-                    pendingRequests : res.data.requests
+                    pendingRequests : res.data.request
                 })
             }
             console.log(userdata.pendingRequests)
@@ -63,8 +65,8 @@ export const Notifications = ()=>{
                 action : e.currentTarget.value
             })
             if(res){
-                const index = userdata.pendingRequests.findIndex(r => r.id === id);
-                userdata.pendingRequests.splice(index, 1)[0];
+                const index = userdata.pendingRequests.findIndex(r => r.user.id === id);
+                userdata.pendingRequests.length > 0 ? userdata.pendingRequests.splice(index, 1)[0] : null;
                 fetchRequests()
                 setRefetch(!refetch)
             }
@@ -82,21 +84,22 @@ export const Notifications = ()=>{
             <PopoverContent className="w-96 p-2 min-h-20">
                 <div>
                     {userdata.pendingRequests && userdata.pendingRequests.length >0 ? userdata.pendingRequests.map((item)=>{
+                        console.log(item)
                         return(
-                        <Card key={item.id} className="rounded-md border-slate-600 border-2 flex gap-4 p-1">
+                        <Card key={item.user.id} className="rounded-md border-slate-600 border-2 flex gap-4 p-1">
                             <div className="p-4">
                                 {/* {<img src={item.user.pfp} alt="img" className="rounded-full h- w-6" />: null} */}
                             </div>
                             <div className="flex flex-col justify-start w-full">
                                 <div className="flex justify-between p-2 w-full">
-                                    <h5 className="font-semibold text-lg">{item.username}</h5>
+                                    <h5 className="font-semibold text-lg">{item.user.username}</h5>
                                     <span className="text-sm">{getTimeDifference(item.createdAt)}
                                     </span>
                                 </div>
                                 <div className="flex gap-6 justify-center">
-                                    <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accept"} onClick={(e)=>handleClick(e , item.id)}>Accept
+                                    <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accept"} onClick={(e)=>handleClick(e , item.user.id)}>Accept
                                     </Button>
-                                    <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"reject"} onClick={(e)=>handleClick(e , item.id)}>Reject
+                                    <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"reject"} onClick={(e)=>handleClick(e , item.user.id)}>Reject
                                     </Button>
                                 </div>
                             </div>

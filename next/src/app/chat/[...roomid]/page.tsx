@@ -5,21 +5,28 @@ import { Container } from "@/src/components/container";
 import { ChatSection } from "@/src/components/chat";
 import { getSession, useSession } from "next-auth/react";
 import Navbar from "@/src/components/navbar";
-import { DashBoard } from "@/src/components/dashboard";
 import { useEffect } from "react";
 import { connect, socket } from "@/src/utils/socket/io";
-import { mountMsgBox } from "@/src/utils/recoil/state";
 import { useRecoilState } from "recoil";
+import { UserData, userData } from "@/src/utils/recoil/state";
 dotenv.config();
 
 export default function (){
-  const [mount , setMount] = useRecoilState(mountMsgBox)
   const {data : session} =  useSession();
+  const [userdata, setUserData] = useRecoilState<UserData>(userData);
+
   useEffect(()=>{
-    // setMount(true)
-    connect()
+    async function emit () {
+      const session = await getSession();
+      session ? socket.emit("USER_DATA" , { sid : session.user.id}) : null
+    }
+    emit()
+    socket.on("USER_DATA" , (data:UserData)=>{
+      setUserData(data)
+    })
+    // connect()
     return (()=>{
-      socket.disconnect()
+      // socket.disconnect()
     })
   },[])
   if(session?.user){

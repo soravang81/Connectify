@@ -7,34 +7,17 @@ import { useEffect  } from "react";
 import { connect, socket } from "../utils/socket/io";
 import { refetchUserData, userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
-
+import { Session } from "inspector";
+import { getSession, useSession } from "next-auth/react";
+import { statuss } from "../components/chat";
 
 export default function Home(){
   const [userDataState, setUserData] = useRecoilState(userData);
   const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
-
+  
   useEffect(()=>{
     console.log("home render")
-    connect()
-    socket.on("message" , (data)=>{
-      //todo toast of the messages
-      // if(window.location.pathname === "/"){
-      //   setUserData((prevUserData) => {
-      //     const updatedFriends = prevUserData.friends.map((friend) =>
-      //       {console.log(friend.unreadMessageCount);
-      //       console.log(friend.id , data.senderId)
-      //         return(
-      //           friend.id === data.senderId
-      //         ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
-      //         : friend
-      //         )
-      //       }
-      //     );
-      //     return { ...prevUserData, friends: updatedFriends };
-      //   });
-      // }
-      
-    })
+    // connect()
     socket.on("UNREAD_MSG" , (data)=> {
       console.log("received event " , data)
       if(window.location.pathname === "/"){
@@ -55,10 +38,25 @@ export default function Home(){
       setRefetchUserData(!refetchUserData)
     })
   return (()=>{
-    socket.disconnect()
+    // socket.disconnect()
     socket.off("message")
     socket.off("UNREAD_MSG")
   })
+  },[])
+  useEffect(()=>{
+    async function emit() {
+      const session = await getSession();
+      if(session){
+        const status : statuss =  {
+          sid : session.user.id,
+          status : {
+            status : "ONLINE",
+          }
+        }
+        socket.emit("STATUS" , status)
+      }
+    }
+    emit()
   },[])
   
     return(

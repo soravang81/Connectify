@@ -1,13 +1,18 @@
 import { io } from "../server";
-import { joinRoomHandler, messageHandler, unreadMessage } from "./handlers"
+import { joinRoomHandler, messageHandler, msgSeenHandler, statusHandler, unreadMessage } from "./handlers"
 import { Sockets, removeSocket, userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
+import { getUserId, populateUserData } from "../lib/functions";
+import { getUserData } from "./handlers/userdata";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")
-    io.on("connection", (socket) => {
+    io.on("connection", async (socket) => {
         console.log("A user connected:", socket.id);
+        const id = await getUserId(socket.id)
+        console.log(id)
+        populateUserData(id as number)
         // io.sockets.sockets.forEach((socket) => {
         //   socket.disconnect(true); // Send a disconnect message to the client
         // });
@@ -21,6 +26,12 @@ export const SocketConnections = ()=>{
         socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
 
         socket.on('message', (data) => messageHandler(socket, data));
+
+        socket.on("USER_DATA", (data) => getUserData(socket, data));
+
+        socket.on('STATUS', (data) => statusHandler(socket, data));
+
+        socket.on("MSG_SEEN" , (data) => msgSeenHandler(socket, data));
         
         socket.on('UNREAD_MSG', (data) => unreadMessage(socket, data));
         

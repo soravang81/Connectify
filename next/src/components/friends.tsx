@@ -7,7 +7,7 @@ import { Container } from "./container";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { encrypt } from "../utils/functions/lib";
 import { useRouter } from "next/navigation";
-import { friendsFetched, mountMsgBox, refetchFriends, userData } from "../utils/recoil/state";
+import { CurrentChatUserId, friendsFetched,  refetchFriends, userData } from "../utils/recoil/state";
 import { socket } from "../utils/socket/io";
 import { Badge } from "./ui/badge";
 
@@ -23,8 +23,8 @@ export const FriendsList = () => {
   const [userdata, setUserData] = useRecoilState(userData);
   const [friendsfetched, setFriendsFetched] = useRecoilState<boolean>(friendsFetched);
   const refetch = useRecoilValue<boolean>(refetchFriends);
+  const [rid , setRid] = useRecoilState<number>(CurrentChatUserId)
   const router = useRouter()
-  const [mount , setMount] = useRecoilState(mountMsgBox)
   const url = process.env.NEXT_PUBLIC_SOCKET_URL;
 
   console.log(userdata.friends)
@@ -53,9 +53,8 @@ export const FriendsList = () => {
   }, [status, refetch]);
 
   const handleClick = (rid : number)=>{
-    const uid = encrypt(rid.toString())
-    console.log(uid)
-    router.push(`/chat/${uid}`)
+    setRid(rid)
+    router.push(`/chat/${rid}`)
     setUserData((prevUserData) => {//to remove the current notification count when 
       //entered chat with user , this is not ai genreated :P
       const updatedFriends = prevUserData.friends.map((friend) => {
@@ -67,6 +66,12 @@ export const FriendsList = () => {
       });
       return { ...prevUserData, friends: updatedFriends };
     });
+    console.log(session?.user.id , rid)
+    socket.emit("MSG_SEEN", {
+      senderId : session?.user.id,
+      receiverId : rid,
+      seen : true
+    })
   }
 
   return (
@@ -74,7 +79,6 @@ export const FriendsList = () => {
       <h2 className="text-2xl">Friends List</h2><br/>
         <div className="flex flex-col gap-2">
         {userdata.friends !==null && userdata.friends.map((friend) =>{
-          console.log(friend)
           if(friend){
             return ( // change the key to the recent chat ...later
               <Card key={friend.id} className="rounded-2xl border-slate-600 border-2 flex gap-4 px-1 py-1 hover:cursor-pointer" onClick={(e)=>handleClick(friend.id)}>

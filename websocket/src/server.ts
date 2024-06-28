@@ -11,7 +11,6 @@ import admin from './routes/admin/admin';
 dotenv.config(); 
 
 export const app = express();
-// export const redis = createClient();
 export const redis = new Redis();
 const httpServer = createServer(app);
 const router = express.Router();
@@ -35,10 +34,7 @@ export const io = new Server(httpServer, {
 
 export async function startServer() {
     try {
-      // redis.disconnect()
-      // await redis.connect();
       console.log("Connected to Redis");
-  
       httpServer.listen(port, () => {
         console.log(`Server is running on port ${port}`);
       });

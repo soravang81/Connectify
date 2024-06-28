@@ -8,10 +8,10 @@ import { ToastContainer } from 'react-toastify';
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-    async function connectt(){
-      await connect();
-    }
-    connectt()
+    // async function connectt(){
+    //   await connect();
+    // }
+    connect()
   },[]);
   return (
     <SessionProvider>

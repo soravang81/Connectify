@@ -2,9 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
-import { signIn } from "next-auth/react";
+import { getSession, signIn, useSession } from "next-auth/react";
 import { SigninSchema } from "@/src/utils/zod/schema";
 import { connect, socket } from "@/src/utils/socket/io";
+import { UserData, userData } from "@/src/utils/recoil/state";
+import { useRecoilState } from "recoil";
 
 export default function SigninComp() {
   const [email,setcurEmail] = useState<string>("")
@@ -18,10 +20,10 @@ export default function SigninComp() {
 
   //   return(()=>{
   //     if(!socket.connected){
-  //       socket.connect()
+  //       connect()
   //     }
   //   })
-  // })
+  // },[])
   
   const handleClick = async (e:FormEvent) => {
     e.preventDefault()
@@ -44,8 +46,9 @@ export default function SigninComp() {
           redirect : false
         });
         if (res?.ok) {
+          const session = await getSession();
           console.log("Signup successful");
-          
+          session?.user ? sessionStorage.setItem("id" ,session.user.id.toString() ) : console.log("session id :" , session?.user.id)
           console.log(res)
           router.push("/");
         } else {

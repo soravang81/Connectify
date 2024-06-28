@@ -1,13 +1,24 @@
+import { SocketAddress } from "net";
+import { getSocketId } from "../lib/functions";
+
 interface props {
     socketId?: string,
-    userId? : number
+    userId? : number,
+    status : {
+        status : status
+        id? : number
+    }
 }
+export type status = "ONLINE" | "ONCHAT" | "OFFLINE";
 export let Sockets:props[] = [];
 
 export const userSocket = ( socketId:string , userId:number) => {
-    const newSockets = {
+    const newSockets : props = {
         socketId: socketId,
         userId: userId,
+        status : {
+            status : "ONLINE",
+        }
     };
     Sockets.push(newSockets)
 };
@@ -22,4 +33,29 @@ export const removeSocket = (id: string | number)=>{
         Sockets.splice(index, 1)[0];
         console.log(Sockets)
     }
+}
+export const editSocket = async(uid : number , status : status , id? : number ):Promise<boolean> => {
+    Sockets.map((socket)=>{
+        if(socket.userId === uid){
+            try {
+                socket.status.status = status;
+                id ? socket.status.id = id : delete socket.status.id
+                return true
+            }
+            catch {
+                return false
+            }
+        }
+    })
+    return false
+
+}
+type getStatusprop = {
+    status : status,
+    id? : number
+}
+export const getStatus = async(id : number): Promise<getStatusprop> =>{
+    const socket = Sockets.find(s=>s.userId === id);
+    // console.log(socket?.status)
+    return socket?.status as getStatusprop;
 }
