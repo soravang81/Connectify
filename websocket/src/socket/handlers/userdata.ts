@@ -11,7 +11,7 @@ export interface UserData {
       id: number;
       username: string;
       pfp: string | null;
-      unreadMessageCount: number;
+    //   unreadMessageCount: number;
     }[];
     notifications: number;
     pendingRequests: {

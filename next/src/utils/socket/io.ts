@@ -1,3 +1,4 @@
+// "use client"
 import { getSession } from 'next-auth/react';
 import { io } from 'socket.io-client';
 
@@ -8,6 +9,7 @@ export const socket = io(socketurl, {
 }); 
 
 export async function connect(){
+  console.log("rerender")
   const session = await getSession()
     if(session?.user){
         socket.io.opts.query = {

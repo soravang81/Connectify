@@ -5,6 +5,7 @@ import { Bell } from "lucide-react";
 import { Notifications } from "./notifications";
 
 export default function Navbar(){
+    console.log("navbar render")
     return(
         <div className="flex justify-between">
             <Button variant={"ghost"} size={"lg"} className="text-3xl font-semibold p-2 hover:bg-transparent hover:text-blue-400">Connectify</Button>

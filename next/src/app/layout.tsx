@@ -10,11 +10,8 @@ export const metadata: Metadata = {
   description: "A Whatsapp like ChatApp",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+  console.log("main rerender")
   return (
     <html lang="en"  suppressHydrationWarning>
       <body className={inter.className}>

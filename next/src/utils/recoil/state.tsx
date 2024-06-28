@@ -1,4 +1,4 @@
-import { fetchCurrentUrl } from '@/src/components/chat';
+import { fetchCurrentUrl, messagesprop } from '@/src/components/chat';
 import { atom, useSetRecoilState } from 'recoil';
 import { socket } from '../socket/io';
 
@@ -28,6 +28,10 @@ export const FriendList = atom<[friends] | []>({
   key: 'FriendList',
   default: []
 });
+export const Messages = atom<messagesprop[]>({
+  key: "Messages",
+  default: []
+})
 export interface UserData {
   id: number;
   username: string;

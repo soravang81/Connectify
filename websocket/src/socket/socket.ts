@@ -5,6 +5,7 @@ import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
 import { getUserId, populateUserData } from "../lib/functions";
 import { getUserData } from "./handlers/userdata";
+import { notificationhandler } from "./handlers/notification";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")
@@ -28,6 +29,8 @@ export const SocketConnections = ()=>{
         socket.on('message', (data) => messageHandler(socket, data));
 
         socket.on("USER_DATA", (data) => getUserData(socket, data));
+
+        socket.on("NOTIFICATION", (data) => notificationhandler(socket, data));
 
         socket.on('STATUS', (data) => statusHandler(socket, data));
 

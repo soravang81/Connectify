@@ -5,7 +5,7 @@ import { redirect, useRouter } from "next/navigation";
 
 interface dataprop{
   message : string;
-  sid? : number;
+  sid : number;
   rid : number;
 }
 interface seen{

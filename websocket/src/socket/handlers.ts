@@ -12,7 +12,7 @@ interface requests{
   senderId : number
   receiver : string;
 }
-interface dataprop{
+export interface msgprop{
   message : string;
   sid : number;
   rid : number;
@@ -20,8 +20,8 @@ interface dataprop{
   seen : boolean
 }
 interface msgseen  {
-  senderId : number ,
-  receiverId : number ,
+  sid : number ,
+  rid : number ,
   seen : boolean
 }
 interface statuss {
@@ -46,39 +46,43 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
 }
 
 export const statusHandler = async (socket : Socket , data : statuss) =>{
-  console.log(data)
   const res = await editSocket(data.sid , data.status.status , data.status.id)
+  console.log(Sockets)
   // console.log(Sockets)
 }
 
-export const messageHandler = async (socket: Socket, data: dataprop) => {
+export const messageHandler = async (socket: Socket, data: msgprop) => {
   console.log("Received message:", data);
 
   try {
     const receiverSocket = await getSocketId(data.rid);
     console.log("Receiver socket:", receiverSocket);
 
-    let message = {
+    let message:msgprop = {
       message: data.message,
-      senderId: data.sid,
-      receiverId: data.rid,
+      sid: data.sid,
+      rid : data.rid,
       time: data.time,
       seen: false 
     };
 
     const status:{status : status , id? : number} = await getStatus(data.rid)
-
+    console.log("status : " , status , data.sid)
+    console.log("status.status : " , status.status)
     if (receiverSocket && status.status === "ONCHAT" && status.id === data.sid ) {
-      message.seen === true
+      message.seen = true
+      console.log("sent direct message")
+
       socket.to(receiverSocket).emit("DIRECT_MSG", message);
     }
     else if (receiverSocket && status.status === "ONLINE"){
+      console.log("sent message")
       socket.to(receiverSocket).emit("message", message);
     }
     else {
       //handle redis blpop to push notification/toast on login
     }
-
+    //saving to redis and database
     const key = `chat:${data.sid}:${data.rid}`;
     const reverseKey = `chat:${data.rid}:${data.sid}`;
     
@@ -110,17 +114,17 @@ export const messageHandler = async (socket: Socket, data: dataprop) => {
 
 
 export const msgSeenHandler = async(socket: Socket ,data : msgseen)=>{
-  const key = await getKey("chat" ,data.senderId , data.receiverId)
+  const key = await getKey("chat" ,data.sid , data.rid)
   console.log("key",key)
   const prevData = key ? await redis.get(key) : null
   if(prevData != null && key){
     const chat = JSON.parse(prevData)
-    console.log(data.senderId)
+    console.log(data.sid)
     chat.map((key:msgseen)=>{
-      key.senderId === data.receiverId ? key.seen = true : null
+      key.sid === data.rid ? key.seen = true : null
     })
     redis.set(key , JSON.stringify(chat))
-    updateMsgToSeen({rid: data.receiverId , sid : data.senderId })
+    updateMsgToSeen({rid: data.rid , sid : data.sid })
   }
 }
 
@@ -162,7 +166,7 @@ export const unreadMessage = async (socket: Socket, data?: any) => {
     const friend = userData.friends.find(friend => friend.id === data.senderId);
     console.log(friend)
     if (friend) {
-      friend.unreadMessageCount += 1;
+      // friend.unreadMessageCount += 1;
       await redis.set(key, JSON.stringify(userData));
       //update the db also and also migrate and remake friendsapi
     }

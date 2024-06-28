@@ -15,6 +15,7 @@ import { Badge } from "./ui/badge";
 import { getTimeDifference } from "../utils/functions/lib";
 import { notificationFetched, refetchFriends, userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
+import { useToast } from "./ui/use-toast";
 dotenv.config();
 
 interface props{
@@ -23,12 +24,23 @@ interface props{
     pfp : string,
     createdAt : string
 }
+type notifMsgType = "accepted" | "rejected" | "received" | "sent"
+interface notification{
+    type : "REQUEST"
+    sid : number,
+    rid : number,
+    s_name? : string
+    r_name? : string
+    message : notifMsgType
+}
+
 export const Notifications = ()=>{
     const {data : session,status} = useSession()
     // const [req , setRequests] = useState<props[]>([]);
     const [refetch , setRefetch] = useRecoilState<boolean>(refetchFriends);
     const [notiFetch , setNotiFetch] = useRecoilState<boolean>(notificationFetched);
     const [userdata , setUserData] = useRecoilState(userData);
+    const { toast } = useToast()
 
     useEffect(()=>{
         if(status === "authenticated" && !notiFetch ){
@@ -37,7 +49,13 @@ export const Notifications = ()=>{
         socket.on("RECEIVED_REQUEST" , (data:props)=>{
             console.log("received")
             fetchRequests()
-        })}       
+        })} 
+        socket.on("NOTIFICATION" , (data:notification)=>{
+            toast({
+                title : `${data.type.toLowerCase().charAt(0).toUpperCase()} ${data.message.toLowerCase().charAt(0).toUpperCase()}`,
+                description : ``
+            })
+        })      
     },[status])
     const fetchRequests = async()=>{
         const url = process.env.NEXT_PUBLIC_SOCKET_URL
@@ -62,11 +80,22 @@ export const Notifications = ()=>{
             const res = await axios.put(url+`/user/request/edit` , {
                 sid : id,
                 rid,
-                action : e.currentTarget.value
+                action : e.currentTarget.value as notifMsgType
             })
+            console.log(res)
             if(res){
-                const index = userdata.pendingRequests.findIndex(r => r.user.id === id);
-                userdata.pendingRequests.length > 0 ? userdata.pendingRequests.splice(index, 1)[0] : null;
+                setUserData(prevState => ({
+                    ...prevState,
+                    pendingRequests: prevState.pendingRequests.filter(r => r.user.id !== id)
+                }));
+                //send toast via socket "notification"
+                const notification:notification = {
+                    type : "REQUEST",
+                    sid : session?.user.id,
+                    rid : id,
+                    message : e.currentTarget.value as notifMsgType
+                }
+                socket.emit("NOTIFICATION" ,notification )
                 fetchRequests()
                 setRefetch(!refetch)
             }
@@ -77,7 +106,8 @@ export const Notifications = ()=>{
         <>
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant={"ghost"} size={"icon"} className="text-lg text-foreground flex"><Bell />{userdata.pendingRequests && userdata.pendingRequests.length > 0 ?<Badge className="
+                <Button variant={"ghost"} onClick={(()=> console.log(userdata.pendingRequests)
+)} size={"icon"} className="text-lg text-foreground flex"><Bell />{userdata.pendingRequests && userdata.pendingRequests.length > 0 ?<Badge className="
                self-start size-4 bg-red-500 flex justify-center items-center p-1"><span className="text-center text-slate-200">{userdata.pendingRequests.length}</span></Badge>:null}
                 </Button>
             </PopoverTrigger>
@@ -97,9 +127,9 @@ export const Notifications = ()=>{
                                     </span>
                                 </div>
                                 <div className="flex gap-6 justify-center">
-                                    <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accept"} onClick={(e)=>handleClick(e , item.user.id)}>Accept
+                                    <Button variant={"default"} className="bg-blue-500 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"accepted"} onClick={(e)=>handleClick(e , item.user.id)}>Accept
                                     </Button>
-                                    <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"reject"} onClick={(e)=>handleClick(e , item.user.id)}>Reject
+                                    <Button variant={"default"} className="bg-red-400 w-28 rounded-sm hover:border-none hover:bg-slate-800" value={"rejected"} onClick={(e)=>handleClick(e , item.user.id)}>Reject
                                     </Button>
                                 </div>
                             </div>

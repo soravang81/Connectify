@@ -14,16 +14,18 @@ dotenv.config();
 export default function (){
   const {data : session} =  useSession();
   const [userdata, setUserData] = useRecoilState<UserData>(userData);
+  console.log("mounted chat page")
 
   useEffect(()=>{
     async function emit () {
       const session = await getSession();
-      session ? socket.emit("USER_DATA" , { sid : session.user.id}) : null
+      session?.user.id ? socket.emit("USER_DATA" , { sid : session.user.id}) : null
     }
     emit()
     socket.on("USER_DATA" , (data:UserData)=>{
       setUserData(data)
     })
+    session?.user.id ? console.log("inside chateffect") : null
     // connect()
     return (()=>{
       // socket.disconnect()

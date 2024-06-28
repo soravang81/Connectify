@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response , RequestParamHandler } from "express";
 import prisma from "../../db/db";
 import { redis } from "../server";
+import { msgprop } from "../socket/handlers";
 // import { getAllUserData } from "../lib/functions";
 
 export interface roomprop {
@@ -17,14 +18,15 @@ export const saveRedisChatToDatabase = async(key:string)=>{
         if(res === 1 && typeof chat== "string"){
             try{
                 const data = JSON.parse(chat)
-                const latestMsg = data[data.length - 1];
+                const latestMsg:msgprop = data[data.length - 1];
                 console.log(latestMsg)
                 await prisma.chat.create({
                     data: {
                       message: latestMsg.message,
-                      senderId: latestMsg.senderId,
-                      receiverId: latestMsg.receiverId,
+                      senderId: latestMsg.sid,
+                      receiverId: latestMsg.rid,
                       time: latestMsg.time,
+                      seen : latestMsg.seen
                     },
                   });
             }

@@ -51,6 +51,7 @@ export default function SigninComp() {
           session?.user ? sessionStorage.setItem("id" ,session.user.id.toString() ) : console.log("session id :" , session?.user.id)
           console.log(res)
           router.push("/");
+          connect()
         } else {
           console.error("Signup failed");
       }

@@ -8,9 +8,10 @@ import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { Send } from "lucide-react";
 import { getSession, useSession } from "next-auth/react";
-import { CurrentChatUserId,refetchUserData, } from "../utils/recoil/state";
+import { CurrentChatUserId,Messages,refetchUserData, } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import axios from "axios";
+import { Session } from "next-auth";
 
 interface sentMessage{
   message : string,
@@ -26,6 +27,13 @@ export interface messagesprop {
 
 export type status = "ONLINE" | "ONCHAT" | "OFFLINE";
 
+export interface socketmessageprop{
+    message : string;
+    sid : number;
+    rid : number;
+    time : Date,
+    seen : boolean
+}
 export interface statuss {
   sid : number
   status : {
@@ -48,12 +56,14 @@ export const fetchCurrentUrl = () => {
 
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
-    const [messages, setMessages] = useState<messagesprop[]>([]);
+    const [messages, setMessages] = useRecoilState<messagesprop[]>(Messages);
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
+    const [fetched , setfetched] = useState(false)
     const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
     const url = process.env.NEXT_PUBLIC_SOCKET_URL;
-    const sid = parseInt(sessionStorage.getItem("id")as string)
+    const { data : session} = useSession();
+    const sid = session?.user.id
     const currentUrl = window.location.href;
     const urlParts = currentUrl.split('/');
     const ridd = parseInt(urlParts[urlParts.length - 1])
@@ -63,21 +73,24 @@ export const ChatSection = ()=>{
       const url = fetchCurrentUrl()
       setRid(url as number)
       setRefetchUserData(!refetchUserData)
+      console.log(sid)
+      if(sid){
         const status : statuss =  {
-          sid ,
+          sid,
           status : {
             status : "ONCHAT",
             id : rid
           }
         }
-      socket.emit("STATUS" , status)
+        socket.emit("STATUS" , status)
+      }
       // receive message
-      socket.on("DIRECT_MSG", (data) => {
+      socket.on("DIRECT_MSG", (data:socketmessageprop) => {
         const newMessage: messagesprop = {
           message: data.message,
           type: 'received',
           time: new Date(),
-        };// fix , its not setting msg when online also get rid of unreadmsg smhw
+        };//get rid of unreadmsg smhw
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
       return () => {
@@ -86,6 +99,7 @@ export const ChatSection = ()=>{
     }, []);
     //send message
     const sendMessageHandler = () => {
+      console.log(sid , rid)
       if(sid && message!=="" && rid){
         const newMessage : sentMessage= {
           message : message,
@@ -122,14 +136,16 @@ export const ChatSection = ()=>{
       if(session){
         const res = await axios.get(url +`/user/chat` , {
           params : {
-            sid ,
+            sid : session.user.id,
             rid : rid,
           }
         })
         console.log(res.data)
-        if(res.data.length > 0){
+        if(res.data.length > 0 && messages.length===0){
+          console.log(res)
+          console.log(sid)
           res.data.map((msg:any)=>{
-            msg.senderId === sid
+            msg.sid === sid
             ? setMessages((prevmsg)=>[
               ...prevmsg , {
                 message : msg.message,
@@ -157,7 +173,7 @@ export const ChatSection = ()=>{
       <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 
         <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col">
             {messages.map((msg, index)=>{
-              console.log(msg)
+              // console.log(msg)
               return(
                 <p key={index} className={`text-2xl border w-fit p-1 border-foreground rounded-lg ${msg.type === "sent"? "self-end" : ""}`}>{msg.message} <span className="text-xs">{msg.time.toLocaleTimeString()}</span></p>
               )

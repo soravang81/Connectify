@@ -68,8 +68,8 @@ export const FriendsList = () => {
     });
     console.log(session?.user.id , rid)
     socket.emit("MSG_SEEN", {
-      senderId : session?.user.id,
-      receiverId : rid,
+      sid : session?.user.id,
+      rid : rid,
       seen : true
     })
   }

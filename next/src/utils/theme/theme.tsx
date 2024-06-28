@@ -9,7 +9,7 @@ import { type ThemeProviderProps } from "next-themes/dist/types"
 export const ThemedSwitch = () => {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
+console.log("ThemedSwitch")
   useEffect(() => {
     setMounted(true);
   }, []);

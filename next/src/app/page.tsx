@@ -5,38 +5,75 @@ import Navbar from "../components/navbar";
 import { FriendsList } from "../components/friends";
 import { useEffect  } from "react";
 import { connect, socket } from "../utils/socket/io";
-import { refetchUserData, userData } from "../utils/recoil/state";
+import { Messages, refetchUserData, userData } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import { Session } from "inspector";
 import { getSession, useSession } from "next-auth/react";
-import { statuss } from "../components/chat";
+import { messagesprop, socketmessageprop, statuss } from "../components/chat";
+import { useToast } from "../components/ui/use-toast";
+import { cn } from "../utils/utils";
 
 export default function Home(){
-  const [userDataState, setUserData] = useRecoilState(userData);
+  const [userdata, setUserData] = useRecoilState(userData);
   const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
+  const [messages, setMessages] = useRecoilState<messagesprop[]>(Messages);
+  const {toast} = useToast()
   
   useEffect(()=>{
     console.log("home render")
     // connect()
-    socket.on("UNREAD_MSG" , (data)=> {
-      console.log("received event " , data)
-      if(window.location.pathname === "/"){
-          setUserData((prevUserData) => {
-            const updatedFriends = prevUserData.friends.map((friend) =>
-              {console.log(friend.unreadMessageCount);
-              console.log(friend.id , data.senderId)
-                return(
-                  friend.id === data.senderId
-                ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
-                : friend
-                )
-              }
-            );
-            return { ...prevUserData, friends: updatedFriends };
-          });
-        }
-      setRefetchUserData(!refetchUserData)
+    socket.on("message" , (data:socketmessageprop)=>{
+      console.log("received 'message' ")
+      const newMessage: messagesprop = {
+        message: data.message,
+        type: 'received',
+        time: new Date(),
+      };//get rid of unreadmsg smhw
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      if(data.seen === false && window.location.pathname === "/"){
+        setUserData((prevUserData) => {
+          const updatedFriends = prevUserData.friends.map((friend) =>
+            {console.log(friend.unreadMessageCount);
+            console.log(friend.id , data.sid)
+            if(friend.id === data.sid){
+              toast({
+                title: friend.username,
+                description: data.message,
+              })
+            }
+            return(
+              friend.id === data.sid
+            ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
+            : friend
+            )
+            }
+          );
+          return { ...prevUserData, friends: updatedFriends };
+        });
+        
+      }
+    setRefetchUserData(!refetchUserData)
     })
+    // socket.on("UNREAD_MSG" , (data)=> {
+    //   console.log("received event " , data)
+    //   if(window.location.pathname === "/"){
+    //       setUserData((prevUserData) => {
+    //         const updatedFriends = prevUserData.friends.map((friend) =>
+    //           {console.log(friend.unreadMessageCount);
+    //           console.log(friend.id , data.senderId)
+    //             return(
+    //               friend.id === data.senderId
+    //             ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
+    //             : friend
+    //             )
+    //           }
+    //         );
+    //         return { ...prevUserData, friends: updatedFriends };
+    //       });
+    //     }
+    //   setRefetchUserData(!refetchUserData)
+    // })
   return (()=>{
     // socket.disconnect()
     socket.off("message")

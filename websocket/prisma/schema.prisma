@@ -67,7 +67,7 @@ model Groupchat {
   group               Group               @relation(fields: [groupId] ,references: [id])
 }
 model Friends {
-  uid                 Int                 @id @default(autoincrement())
+  id                  Int                 @id @default(autoincrement())
   userId              Int
   friendId            Int
   user                Users               @relation("UserFriends", fields: [userId], references: [id])
