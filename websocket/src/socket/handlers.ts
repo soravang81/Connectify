@@ -1,10 +1,11 @@
 import { Socket } from "socket.io"
-import { getKey, getRequestdetails, getSocketId, getUserdetails } from "../lib/functions";
+import { getKey, getRequestdetails, getSocketId, getTimeDifference, getUserdetails } from "../lib/functions";
 import { redis } from "../server";
 import { saveRedisChatToDatabase } from "../redis/redis";
 import { updateMsgToSeen } from "../lib/db";
 import { Sockets, editSocket, getStatus, status } from "./user-socket";
 import { UserData } from "./handlers/userdata";
+import prisma from "../../db/db";
 
 
 interface requests{
@@ -45,10 +46,56 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
   }
 }
 
+
 export const statusHandler = async (socket : Socket , data : statuss) =>{
   const res = await editSocket(data.sid , data.status.status , data.status.id)
   console.log(Sockets)
   // console.log(Sockets)
+}
+
+export const getStatusHandler = async (socket : Socket , data : { sid : number , rid : number}) =>{
+  const status = await getStatus(data.rid)
+  const s_socket = await getSocketId(data.sid)
+  console.log("r_socket" , data.sid  , data.rid,s_socket)
+  console.log("status" , status)
+  if(status && s_socket){
+    console.log("emmiting")
+    try{
+      socket.emit("GET_STATUS" , status)
+    }
+    catch(e){
+      console.error("Error sending status to client:", e);
+    }
+  }
+  else if(s_socket){
+    try{
+      const res = await prisma.users.findUnique({
+        where : {
+          id : data.rid
+        },
+        select : {
+          lastSeen : true
+        }
+      })
+      if(res && res.lastSeen){
+        const time = getTimeDifference(res.lastSeen.toString())
+        socket.to(s_socket).emit("GET_STATUS" , {
+          status : `last seen ${time} ago`
+        })
+      }
+      else{
+        socket.to(s_socket).emit("GET_STATUS" , {
+          status : ""
+        })
+      }
+    }
+    catch(e){
+      console.error("Error getting user last seen:", e);
+    }
+  }
+  else{
+    console.log("No socket found")
+  }
 }
 
 export const messageHandler = async (socket: Socket, data: msgprop) => {
@@ -66,16 +113,16 @@ export const messageHandler = async (socket: Socket, data: msgprop) => {
       seen: false 
     };
 
-    const status:{status : status , id? : number} = await getStatus(data.rid)
+    const status:{status : status , id? : number} | false = await getStatus(data.rid)
     console.log("status : " , status , data.sid)
-    console.log("status.status : " , status.status)
-    if (receiverSocket && status.status === "ONCHAT" && status.id === data.sid ) {
+    status ? console.log("status.status : " , status.status) : null
+    if (receiverSocket && status && status.status === "ONCHAT" && status.id === data.sid ) {
       message.seen = true
       console.log("sent direct message")
 
       socket.to(receiverSocket).emit("DIRECT_MSG", message);
     }
-    else if (receiverSocket && status.status === "ONLINE"){
+    else if (receiverSocket && status  && status.status === "ONLINE"){
       console.log("sent message")
       socket.to(receiverSocket).emit("message", message);
     }

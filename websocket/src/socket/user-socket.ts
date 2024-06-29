@@ -1,7 +1,9 @@
-import { SocketAddress } from "net";
-import { getSocketId } from "../lib/functions";
+import { getSocketId, getUserId } from "../lib/functions";
+import prisma from "../../db/db";
+import { redis } from "../server";
+import { setLastSeen } from "../lib/db";
 
-interface props {
+export interface SocketProps {
     socketId?: string,
     userId? : number,
     status : {
@@ -10,10 +12,10 @@ interface props {
     }
 }
 export type status = "ONLINE" | "ONCHAT" | "OFFLINE";
-export let Sockets:props[] = [];
+export let Sockets:SocketProps[] = [];
 
 export const userSocket = ( socketId:string , userId:number) => {
-    const newSockets : props = {
+    const newSockets : SocketProps = {
         socketId: socketId,
         userId: userId,
         status : {
@@ -21,6 +23,7 @@ export const userSocket = ( socketId:string , userId:number) => {
         }
     };
     Sockets.push(newSockets)
+    redis.set("Sockets" , JSON.stringify(Sockets))
 };
 export const removeSocket = (id: string | number)=>{
     if(typeof id === "string"){
@@ -50,14 +53,27 @@ export const editSocket = async(uid : number , status : status , id? : number ):
         }
     })
     return resp
-
 }
+
+export const handleDisconnect =async (id : string) =>{
+    const isSuccess = await setLastSeen(id)
+    console.log("set lastseen ",isSuccess)
+    //clear all related redis data if this user , firstly 
+}
+
+
+
 type getStatusprop = {
     status : status,
     id? : number
 }
-export const getStatus = async(id : number): Promise<getStatusprop> =>{
+export const getStatus = async(id : number): Promise<getStatusprop | false> =>{
     const socket = Sockets.find(s=>s.userId === id);
     // console.log(socket?.status)
-    return socket?.status as getStatusprop;
+    if(socket?.status){
+        return socket?.status
+    }
+    else{
+        return false
+    }
 }

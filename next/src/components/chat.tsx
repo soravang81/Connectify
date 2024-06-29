@@ -54,6 +54,7 @@ export const fetchCurrentUrl = () => {
   }
 };
 
+
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
     const [messages, setMessages] = useRecoilState<messagesprop[]>(Messages);
@@ -170,8 +171,8 @@ export const ChatSection = ()=>{
     },[])
 
     return (
-      <Container className="w-full h-[80vh] flex flex-col gap-4 text-2xl"> 
-        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col">
+      <Container className="w-full h-full flex flex-col gap-4 text-2xl md:mt-0"> 
+        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col pt-2 ">
             {messages.map((msg, index)=>{
               // console.log(msg)
               return(

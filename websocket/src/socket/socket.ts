@@ -1,6 +1,6 @@
 import { io } from "../server";
-import { joinRoomHandler, messageHandler, msgSeenHandler, statusHandler, unreadMessage } from "./handlers"
-import { Sockets, removeSocket, userSocket } from "./user-socket";
+import { getStatusHandler, joinRoomHandler, messageHandler, msgSeenHandler, statusHandler, unreadMessage } from "./handlers"
+import { Sockets, handleDisconnect, removeSocket,userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
 import { getUserId, populateUserData } from "../lib/functions";
@@ -18,10 +18,11 @@ export const SocketConnections = ()=>{
         //   socket.disconnect(true); // Send a disconnect message to the client
         // });
         
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async() => {
           removeSocket(socket.id)
           console.log("A user disconnected:", socket.id);
           console.log(Sockets);
+          handleDisconnect(socket.id)
         });
 
         socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
@@ -33,6 +34,8 @@ export const SocketConnections = ()=>{
         socket.on("NOTIFICATION", (data) => notificationhandler(socket, data));
 
         socket.on('STATUS', (data) => statusHandler(socket, data));
+
+        socket.on('GET_STATUS', (data) => getStatusHandler(socket, data));
 
         socket.on("MSG_SEEN" , (data) => msgSeenHandler(socket, data));
         

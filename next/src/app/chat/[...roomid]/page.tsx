@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { connect, socket } from "@/src/utils/socket/io";
 import { useRecoilState } from "recoil";
 import { UserData, userData } from "@/src/utils/recoil/state";
+import { ChatBar } from "@/src/components/chatbar";
 dotenv.config();
 
 export default function (){
@@ -35,10 +36,13 @@ export default function (){
     return(
       <Container className="flex flex-col min-w-screen min-h-[92.9vh] mb-0">
         <Navbar/>
-        <div className="flex justify-between border-2 border-foreground rounded-xl mt-2 min-h-[87vh]">
+        <div className="flex justify-center border-2 border-foreground rounded-xl mt-2 min-h-[87vh]">
           <FriendsList/>
-          <div className="border-2 border-slate-500 w[1px] m-4"></div>
-          <ChatSection/>
+          <div className="border-2 border-slate-500 w[1px] m-3"></div>
+          <div className="flex flex-col w-full h-[80vh]">
+            <ChatBar/>
+            <ChatSection/>
+          </div>
         </div>
       </Container>
     )

@@ -1,4 +1,4 @@
-import { signOut } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 import { Button } from "@/src/components/ui/button";
 import * as crypto from 'crypto';
 import dotenv from "dotenv"
@@ -71,3 +71,8 @@ const padString = (str: string): string => {
   const paddingChar = String.fromCharCode(paddingLength);
   return str + paddingChar.repeat(paddingLength);
 };
+
+export const getUid = async ()=>{
+  const session = await getSession();
+  return session?.user.id 
+}

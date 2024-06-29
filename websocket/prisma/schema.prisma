@@ -15,12 +15,21 @@ model Users {
   email               String              @unique
   password            String      
   username            String              @unique  
-  pfp                 String?     
+  pfp                 String?
+  lastSeen            DateTime?    
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @default(now())
   requests            Requests[]
   friends             Friends[]           @relation("UserFriends")
   friendOf            Friends[]           @relation("FriendUsers")
+}
+model Friends {
+  id                  Int                 @id @default(autoincrement())
+  userId              Int
+  friendId            Int
+  unreadMessageCount  Int?       
+  user                Users               @relation("UserFriends", fields: [userId], references: [id])
+  friend              Users               @relation("FriendUsers", fields: [friendId], references: [id])
 }
 
 model Requests {
@@ -65,11 +74,4 @@ model Groupchat {
   seenBy              Int[]               @default([])
   time                DateTime
   group               Group               @relation(fields: [groupId] ,references: [id])
-}
-model Friends {
-  id                  Int                 @id @default(autoincrement())
-  userId              Int
-  friendId            Int
-  user                Users               @relation("UserFriends", fields: [userId], references: [id])
-  friend              Users               @relation("FriendUsers", fields: [friendId], references: [id])
 }
