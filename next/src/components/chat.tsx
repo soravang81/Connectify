@@ -14,12 +14,14 @@ import axios from "axios";
 import { Session } from "next-auth";
 
 interface sentMessage{
+  id? : number
   message : string,
   sid : number,
   rid : number,
   time : Date
 }
 export interface messagesprop {
+  id? : number 
   message : string,
   type : "sent" | "received"
   time : Date
@@ -57,6 +59,7 @@ export const fetchCurrentUrl = () => {
 
 export const ChatSection = ()=>{
     const [message, setMessage] = useState<string>("");
+    const [sortedMessages , sortMessages] = useState<messagesprop[]>()
     const [messages, setMessages] = useRecoilState<messagesprop[]>(Messages);
     const msgbox = useRef<HTMLDivElement>(null)
     const bottom = useRef<HTMLDivElement>(null)
@@ -131,7 +134,7 @@ export const ChatSection = ()=>{
       scrollToBottom();
     },[messages]);
 
-    //old chat
+    //fetch chat
     const getData = async()=>{
       const session = await getSession();
       if(session){
@@ -142,12 +145,12 @@ export const ChatSection = ()=>{
           }
         })
         console.log(res.data)
-        if(res.data.length > 0 && messages.length===0){
+        if(res.data.length > 0){
           console.log(res)
           console.log(sid)
-          res.data.map((msg:any)=>{
-            msg.sid === sid
-            ? setMessages((prevmsg)=>[
+          setMessages([])
+          res.data.map(async(msg:any)=>{
+            msg.sid === sid ? setMessages((prevmsg)=>[
               ...prevmsg , {
                 message : msg.message,
                 type : "sent",
@@ -171,12 +174,12 @@ export const ChatSection = ()=>{
     },[])
 
     return (
-      <Container className="w-full h-full flex flex-col gap-4 text-2xl md:mt-0"> 
-        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 h-full w-full flex flex-col pt-2 ">
+      <Container className="h-full flex flex-col gap-4 text-2xl md:mt-0"> 
+        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 max-w-full max-h-[38rem] flex flex-col pt-2 ">
             {messages.map((msg, index)=>{
               // console.log(msg)
               return(
-                <p key={index} className={`text-2xl border w-fit p-1 border-foreground rounded-lg ${msg.type === "sent"? "self-end" : ""}`}>{msg.message} <span className="text-xs">{msg.time.toLocaleTimeString()}</span></p>
+                <p key={index} className={`text-2xl border w-fit max-w-auto p-1 border-foreground rounded-lg ${msg.type === "sent"? "self-end" : ""}`}>{msg.message} <span className="text-xs">{msg.time.toLocaleTimeString()}</span></p>
               )
             })}
             <div ref={bottom}></div>

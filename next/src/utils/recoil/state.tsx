@@ -14,6 +14,10 @@ export const refetchUserData = atom({
   key: 'refetchUserData',
   default: false,
 });
+export const ChatbarBackbtn = atom({
+  key: 'ChatbarBackbtn',
+  default: true,
+});
 export const CurrentChatUserId = atom<number>({
   key: 'CurrentChatUserId',
   default : fetchCurrentUrl()

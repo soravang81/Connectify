@@ -106,18 +106,31 @@ export const cachedChat = async( req :any , res: Response , next :NextFunction )
                                             senderId : rid,
                                             receiverId : sid
                                         }]
+                                    },
+                                    orderBy : {
+                                        time : "asc"
+                                    }
+                                    
+                                })
+                                const newChat = chat.map(c => {
+                                    return {
+                                        message: c.message,
+                                        sid: c.senderId,
+                                        rid: c.receiverId,
+                                        seen : c.seen,
+                                        time: c.time
                                     }
                                 })
-                                console.log(chat)
+                                console.log(newChat)
                                 if(chat.length > 0){
-                                    redis.set(key, JSON.stringify(chat), 'EX', 60 * 15, (err) => {
+                                    await redis.set(key, JSON.stringify(newChat), 'EX', 60 * 15, (err) => {
                                         if (err) {  
                                             console.log(err)           
                                             req.error = "redis set error"
                                             next()
                                         }
-                                        console.log("from prisma")
-                                        req.data = chat;
+                                        console.log(`key : ${key} and from prisma`)
+                                        req.data = newChat;
                                         next();
                                     });
                                 }

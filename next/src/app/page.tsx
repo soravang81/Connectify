@@ -39,7 +39,7 @@ export default function Home(){
             if(friend.id === data.sid){
               toast({
                 title: friend.username,
-                description: data.message,
+                description: data.message
               })
             }
             return(

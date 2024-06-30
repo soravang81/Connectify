@@ -46,7 +46,6 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
   }
 }
 
-
 export const statusHandler = async (socket : Socket , data : statuss) =>{
   const res = await editSocket(data.sid , data.status.status , data.status.id)
   console.log(Sockets)
@@ -79,12 +78,14 @@ export const getStatusHandler = async (socket : Socket , data : { sid : number ,
       })
       if(res && res.lastSeen){
         const time = getTimeDifference(res.lastSeen.toString())
-        socket.to(s_socket).emit("GET_STATUS" , {
-          status : `last seen ${time} ago`
+        console.log("lastseen",res.lastSeen)
+        console.log("time",time)
+        socket.emit("GET_STATUS" , {
+          status : `last seen ${time}`
         })
       }
       else{
-        socket.to(s_socket).emit("GET_STATUS" , {
+        socket.emit("GET_STATUS" , {
           status : ""
         })
       }
@@ -128,6 +129,7 @@ export const messageHandler = async (socket: Socket, data: msgprop) => {
     }
     else {
       //handle redis blpop to push notification/toast on login
+      // also add toast as new messages
     }
     //saving to redis and database
     const key = `chat:${data.sid}:${data.rid}`;

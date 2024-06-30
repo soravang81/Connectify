@@ -19,10 +19,10 @@ export const SocketConnections = ()=>{
         // });
         
         socket.on("disconnect", async() => {
+          await handleDisconnect(socket.id)
           removeSocket(socket.id)
           console.log("A user disconnected:", socket.id);
           console.log(Sockets);
-          handleDisconnect(socket.id)
         });
 
         socket.on("SEND_REQUEST" , (data)=>sendRequest(socket , data))
