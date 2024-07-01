@@ -25,11 +25,14 @@ export default function Home(){
   useEffect(()=>{
     console.log("home render")
     // connect()
-    const uid = getUid()
-    console.log(uid);
-    if(!uid){
-      toast.info("You are not signed in")
+    const isSignedIn = async()=>{
+      const uid = await getUid()
+      console.log(uid);
+      if(!uid){
+        toast.info("You are not signed in")
+      }
     }
+    isSignedIn();
     socket.on("message" , (data:socketmessageprop)=>{
       console.log("received 'message' ")
       const newMessage: messagesprop = {
