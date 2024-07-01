@@ -12,16 +12,24 @@ import { getSession, useSession } from "next-auth/react";
 import { messagesprop, socketmessageprop, statuss } from "../components/chat";
 import { useToast } from "../components/ui/use-toast";
 import { cn } from "../utils/utils";
+import { Toaster, toast } from "sonner"
+import { getuid } from "process";
+import { getUid } from "../utils/functions/lib";
 
 export default function Home(){
   const [userdata, setUserData] = useRecoilState(userData);
   const [refetchuserData, setRefetchUserData] = useRecoilState(refetchUserData);
   const [messages, setMessages] = useRecoilState<messagesprop[]>(Messages);
-  const {toast} = useToast()
+  // const {toast} = useToast()
   
   useEffect(()=>{
     console.log("home render")
     // connect()
+    const uid = getUid()
+    console.log(uid);
+    if(!uid){
+      toast.info("You are not signed in")
+    }
     socket.on("message" , (data:socketmessageprop)=>{
       console.log("received 'message' ")
       const newMessage: messagesprop = {
@@ -29,7 +37,7 @@ export default function Home(){
         type: 'received',
         time: new Date(),
       };//get rid of unreadmsg smhw
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);      
 
       if(data.seen === false && window.location.pathname === "/"){
         setUserData((prevUserData) => {
@@ -37,10 +45,12 @@ export default function Home(){
             {console.log(friend.unreadMessageCount);
             console.log(friend.id , data.sid)
             if(friend.id === data.sid){
-              toast({
-                title: friend.username,
-                description: data.message
-              })
+              toast(
+                <div className="flex flex-col">
+                  <p className="text-xl">{friend.username}</p>
+                  <p>{data.message}</p>
+                </div>
+              )
             }
             return(
               friend.id === data.sid
@@ -55,25 +65,6 @@ export default function Home(){
       }
     setRefetchUserData(!refetchUserData)
     })
-    // socket.on("UNREAD_MSG" , (data)=> {
-    //   console.log("received event " , data)
-    //   if(window.location.pathname === "/"){
-    //       setUserData((prevUserData) => {
-    //         const updatedFriends = prevUserData.friends.map((friend) =>
-    //           {console.log(friend.unreadMessageCount);
-    //           console.log(friend.id , data.senderId)
-    //             return(
-    //               friend.id === data.senderId
-    //             ? { ...friend, unreadMessageCount : friend.unreadMessageCount +1 }
-    //             : friend
-    //             )
-    //           }
-    //         );
-    //         return { ...prevUserData, friends: updatedFriends };
-    //       });
-    //     }
-    //   setRefetchUserData(!refetchUserData)
-    // })
   return (()=>{
     // socket.disconnect()
     socket.off("message")
@@ -91,6 +82,9 @@ export default function Home(){
           }
         }
         socket.emit("STATUS" , status)
+      }
+      else{
+        toast.info("You are not signed in")
       }
     }
     emit()

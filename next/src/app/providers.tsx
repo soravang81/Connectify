@@ -5,7 +5,9 @@ import { RecoilRoot } from 'recoil';
 import { ThemeProvider } from '../utils/theme/theme';
 import { connect } from '../utils/socket/io';
 import { ToastContainer } from 'react-toastify';
-import { Toaster } from '../components/ui/toaster';
+import { Toaster as Toasterr } from '../components/ui/toaster';
+import { Toaster } from "sonner"
+
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
@@ -27,7 +29,8 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
             >
           <ToastContainer>
           </ToastContainer>
-          <Toaster/>
+          <Toaster richColors position='top-right' expand={false}   />
+          <Toasterr/>
           {children}
         </ThemeProvider>
       </RecoilRoot>

@@ -175,7 +175,7 @@ export const ChatSection = ()=>{
 
     return (
       <Container className="h-full flex flex-col gap-4 text-2xl md:mt-0"> 
-        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 max-w-full max-h-[38rem] flex flex-col pt-2 ">
+        <div ref={msgbox} className="overflow-hidden hover:overflow-auto gap-3 max-w-full h-[38rem] flex flex-col pt-2 ">
             {messages.map((msg, index)=>{
               // console.log(msg)
               return(

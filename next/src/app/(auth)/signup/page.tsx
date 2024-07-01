@@ -52,6 +52,7 @@ export default function SignupComp() {
         if (res?.ok) {
           console.log("Signup successful");
           router.push("/");
+          connect()
         }
         else{
           console.error("Signup failed");
