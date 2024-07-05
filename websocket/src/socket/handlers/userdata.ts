@@ -6,21 +6,30 @@ export interface UserData {
     id: number;
     username: string;
     email: string;
-    pfp: string | null;
+    pfp : {
+        path : string,
+        link : string
+    }
     friends: {
       id: number;
+      email : string
       username: string;
-      pfp: string | null;
-    //   unreadMessageCount: number;
+      pfp : {
+        path : string,
+        link : string
+    }
     }[];
     notifications: number;
     pendingRequests: {
         user : {
             id: number;
             username: string;
-            pfp: string;
+            pfp : {
+                path : string,
+                link : string
+            }
           }
-      createdAt: string;
+      createdAt: Date;
     }[];
   }
 export interface updateUserDatatype {
@@ -31,33 +40,30 @@ export interface updateUserDatatype {
     data : []
 }
 
-export const getUserData = async(socket : Socket , data : {sid : number , rid : number}) : Promise<boolean>=>{
+export const getUserData = async(socket : Socket , data : {id : number})=>{
+    console.log("userdata id :",data.id)
     try{
-        const key = await getKey("data" , data.sid , data.rid)
-        if(key){
+        const key = `data:${data.id}`
             const resp =  await redis.get(key)
+            console.log("redis userdata ",resp)
             if(resp){
+                console.log("inside resp userdata")
                 const userData =  JSON.parse(resp)
-                const r_socket = await getSocketId(data.rid) 
-                socket.to(r_socket as string).emit(userData)
-                return true
+                console.log(userData)
+                socket.emit("USER_DATA",userData)
             }
             else {
-                await populateUserData(data.sid)
+                console.log("insdie else userdata")
+                await populateUserData(data.id)
                 const resp =  await redis.get(key)
                 if(resp){
                     const userData =  JSON.parse(resp)
-                    const r_socket = await getSocketId(data.rid) 
-                    socket.to(r_socket as string).emit(userData)
-                    return true
+                    socket.emit("USER_DATA",userData)
                 }
             }
-        }
-        return false
-
     }
     catch(e){
-        console.error("Error while fetching userdata from redis")
+        console.error("Error while fetching userdata from redis" ,e)
         return false
     }
 }

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         const { email, password, username } = await req.json();
         console.log(email, password, username);
 
-        const user = await prisma.users.create({
+        const res = await prisma.users.create({
             data: {
                 email,
                 password,
@@ -20,15 +20,21 @@ export async function POST(req: NextRequest) {
             }
         });
 
-        if (user) {
-            // console.log("User creation succeeded");
-            // console.log(url)
-            return NextResponse.json(user)
-        } else {
-            return NextResponse.json(false)
+        if(res){
+            await prisma.profilePics.create({
+                data: {
+                  uid: res.id,
+                },
+            });
+            return NextResponse.json(res);
         }
-    } catch (error:any) {
-        console.error("Error occurred during user creation:", error);
-        return NextResponse.json(false);
+        else {
+            console.error("User id is null")
+        }
+
+    }
+    catch(e:any){
+        console.error("Error while creating user",e.message)
+        return NextResponse.json(false)
     }
 }

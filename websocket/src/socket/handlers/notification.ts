@@ -11,6 +11,7 @@ export interface notification{
 
 export const notificationhandler = async(socket : Socket , data :notification ) =>{
     const r_socket = await getSocketId(data.rid)
+    console.log()
     if(r_socket){
         const notification:notification = {
             type : data.type,

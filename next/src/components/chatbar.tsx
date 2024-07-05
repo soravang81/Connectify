@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { getUid } from "../utils/functions/lib";
 import { Button } from "./ui/button";
 import { ArrowLeft, icons } from "lucide-react";
+import { DropDownMenu } from "./chatbar-menu";
 
 type status = "ONLINE" | string
 interface props extends React.HTMLAttributes<HTMLDivElement> {}
@@ -12,9 +13,6 @@ export const ChatBar:React.FC<props> = ({...props })=>{
     const userdata = useRecoilValueLoadable(userData)
     const friendId = useRecoilValueLoadable<number>(CurrentChatUserId)
     const [friendStatus , setFriendStatus] = useState<status>()
-    const [isBackButton , showBackButton] = useState(false)
-    const [isChatSection, setIsChatSection] = useRecoilState<boolean>(ChatbarBackbtn);
-
     const [isVisible , setIsVisible] = useState(false)
 
     const friend = userdata.contents.friends.find((f:any)=>f.id === friendId.contents)
@@ -23,7 +21,7 @@ export const ChatBar:React.FC<props> = ({...props })=>{
     const getFriendStatus = async() =>{
         console.log("getStatus call")
         const sid = await getUid()
-        socket.emit("GET_STATUS" , {
+        socket.emit("GET_STATUS" , {//emit event to get the friend status
             sid, 
             rid : friendId.contents
         })
@@ -32,12 +30,12 @@ export const ChatBar:React.FC<props> = ({...props })=>{
         if(friendId.state && userdata.state === "hasValue"){
             getFriendStatus()
         }
-        socket.on("GET_STATUS", (data) => {
+        socket.on("GET_STATUS", (data) => {//listen the sent event i.e getstatus to get friend status
             console.log("received getstatus" , data)
             if(data.status !== false){
                 const status:status = data.status === "ONCHAT" ? "ONLINE" : data.status as string
                 setFriendStatus(status.toLowerCase())
-                setTimeout(() => {
+                setTimeout(() => {//to fade the status after 5 seconds with animation
                     setIsVisible(true)
                 }, 700);
                 setTimeout(() => {
@@ -47,21 +45,22 @@ export const ChatBar:React.FC<props> = ({...props })=>{
         });
     },[friendId.state])
     
-    const handleClick = ()=>{
-        setIsChatSection(false)
-        showBackButton(true)
-    }
-    return(
-        <>
-        <div className="flex w-full items-center text-xl gap-4 p-3 rounded-lg ">
-            {/* <img src="" ></img> */}
-            {isBackButton && <Button className="rounded-full p-2" onClick={()=>{setIsChatSection(true);showBackButton(false)}} size={"icon"}><ArrowLeft className=""/></Button>}
-            <div className="p-6 rounded-full bg-white"></div>
-            <div {...props} onClick={handleClick} className="flex flex-col w-full hover:bg-slate-600 hover:cursor-pointer rounded-lg p-1">
-                <p className="text-2xl">{friendName}</p>
-                <p className={`text-xs transition-opacity duration-5000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`} >{friendStatus}</p>
+    if(userdata.contents){
+        return(
+            <>
+            <div className="flex w-full items-center text-xl gap-2 p-3 rounded-lg ">
+                <img src={userdata.contents.pfp.link} className="aspect-square size-16 rounded-full p-1"></img>
+                <div  className="flex flex-col w-full  rounded-lg p-1">
+                    <p className="text-2xl">{friendName}</p>
+                    <p className={`text-xs transition-opacity duration-5000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`} >{friendStatus}</p>
+                </div>
+                <DropDownMenu friendId={friendId.contents} ></DropDownMenu>
             </div>
-        </div>
-        </>
-    )
+            </>
+        )
+    }
+    else{
+        return <div>loading..</div>
+    }
+    
 }

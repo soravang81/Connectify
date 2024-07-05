@@ -6,10 +6,13 @@ import { ThemeProvider } from '../utils/theme/theme';
 import { connect } from '../utils/socket/io';
 import { ToastContainer } from 'react-toastify';
 import { Toaster as Toasterr } from '../components/ui/toaster';
-import { Toaster } from "sonner"
+import { Toaster, ToasterProps } from "sonner"
+import { useTheme } from 'next-themes';
+
 
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
+  const {theme} = useTheme()
   useEffect(() => {
     async function connectt(){
       await connect();
@@ -29,7 +32,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
             >
           <ToastContainer>
           </ToastContainer>
-          <Toaster richColors position='top-right' expand={false}   />
+          <Toaster  position='top-right' expand={false} theme={theme as any}  />
           <Toasterr/>
           {children}
         </ThemeProvider>

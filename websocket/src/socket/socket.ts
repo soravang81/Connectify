@@ -1,5 +1,5 @@
 import { io } from "../server";
-import { getStatusHandler, joinRoomHandler, messageHandler, msgSeenHandler, statusHandler, unreadMessage } from "./handlers"
+import { getStatusHandler, joinRoomHandler, messageHandler, msgSeenHandler, statusHandler } from "./handlers"
 import { Sockets, handleDisconnect, removeSocket,userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
@@ -39,7 +39,7 @@ export const SocketConnections = ()=>{
 
         socket.on("MSG_SEEN" , (data) => msgSeenHandler(socket, data));
         
-        socket.on('UNREAD_MSG', (data) => unreadMessage(socket, data));
+        // socket.on('UNREAD_MSG', (data) => unreadMessage(socket, data));
         
         socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
         

@@ -136,7 +136,7 @@ request.put("/edit", async (req, res) => {
   const { sid, rid, action } = req.body;
   const senderId = parseInt(sid);
   const receiverId = parseInt(rid);
-
+  console.log("action : ",action)
   try {
     if (action === "accepted") {
       const requestUpdate = prisma.requests.updateMany({

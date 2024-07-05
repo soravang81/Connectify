@@ -8,7 +8,7 @@ export default function Navbar(){
     console.log("navbar render")
     return(
         <div className="flex justify-between">
-            <Button variant={"ghost"} size={"lg"} className="text-3xl font-semibold p-2 hover:bg-transparent hover:text-blue-400">Connectify</Button>
+            <Button variant={"ghost"} size={"lg"} className="text-3xl font-semibold p-2 hover:bg-transparent hover:text-blue-400" href="/">Connectify</Button>
             <div className="flex gap-4 items-center">
                 <Notifications/>
                 <ThemedSwitch/>

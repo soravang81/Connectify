@@ -189,41 +189,41 @@ export const leaveRoomHandler = (socket: Socket, data: { room : string }): void 
   console.log("User left room:", data.room);
 };
 
-export const unreadMessage = async (socket: Socket, data?: any) => {
-  if (!data || !data.senderId || !data.receiverId) {
-    console.error('Invalid data');
-    return;
-  }
+// export const unreadMessage = async (socket: Socket, data?: any) => {
+//   if (!data || !data.senderId || !data.receiverId) {
+//     console.error('Invalid data');
+//     return;
+//   }
 
-  const key = `data:${data.receiverId}`;
-  console.log(key)
+//   const key = `data:${data.receiverId}`;
+//   console.log(key)
   
-  try {
-    const receiverSocket = await getSocketId(data.receiverId)
-    receiverSocket ? socket.to(receiverSocket).emit("UNREAD_MSG" , {
-      senderId : data.senderId,
-      receiverId : data.receiverId,
+//   try {
+//     const receiverSocket = await getSocketId(data.receiverId)
+//     receiverSocket ? socket.to(receiverSocket).emit("UNREAD_MSG" , {
+//       senderId : data.senderId,
+//       receiverId : data.receiverId,
 
-    }):null;
-    const userDataStr = await redis.get(key);
-    if (!userDataStr) {
-      console.error('User data not found');
-      return
-    }
-    const userData: UserData = JSON.parse(userDataStr);
+//     }):null;
+//     const userDataStr = await redis.get(key);
+//     if (!userDataStr) {
+//       console.error('User data not found');
+//       return
+//     }
+//     const userData: UserData = JSON.parse(userDataStr);
 
-    const friend = userData.friends.find(friend => friend.id === data.senderId);
-    console.log(friend)
-    if (friend) {
-      // friend.unreadMessageCount += 1;
-      await redis.set(key, JSON.stringify(userData));
-      //update the db also and also migrate and remake friendsapi
-    }
-    else {
-      console.error('Friend not found');
-    }
-  }
-  catch (error) {
-    console.error('Error updating unread message count:', error);
-  }
-};
+//     const friend = userData.friends.find(friend => friend.id === data.senderId);
+//     console.log(friend)
+//     if (friend) {
+//       // friend.unreadMessageCount += 1;
+//       await redis.set(key, JSON.stringify(userData));
+//       //update the db also and also migrate and remake friendsapi
+//     }
+//     else {
+//       console.error('Friend not found');
+//     }
+//   }
+//   catch (error) {
+//     console.error('Error updating unread message count:', error);
+//   }
+// };

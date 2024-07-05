@@ -1,5 +1,5 @@
 import { fetchCurrentUrl, messagesprop } from '@/src/components/chat';
-import { atom, useSetRecoilState } from 'recoil';
+import { atom, selector, useSetRecoilState } from 'recoil';
 import { socket } from '../socket/io';
 
 export const friendsFetched = atom({
@@ -14,9 +14,17 @@ export const refetchUserData = atom({
   key: 'refetchUserData',
   default: false,
 });
+export const ProfileSidebar = atom({
+  key: 'ProfileSidebar',
+  default: false,
+});
 export const ChatbarBackbtn = atom({
   key: 'ChatbarBackbtn',
   default: true,
+});
+export const isDialog = atom({
+  key: 'isDialog',
+  default: false,
 });
 export const CurrentChatUserId = atom<number>({
   key: 'CurrentChatUserId',
@@ -25,7 +33,10 @@ export const CurrentChatUserId = atom<number>({
 interface friends{
   id : number,
   username : string,
-  pfp : string | null,
+  pfp: {
+    path : string,
+    link : string
+  },
   unreadMessageCount : number
 }
 export const FriendList = atom<[friends] | []>({
@@ -36,15 +47,33 @@ export const Messages = atom<messagesprop[]>({
   key: "Messages",
   default: []
 })
+export const profilePic = atom<File | null>({
+  key: 'profilePic',
+  default: null,
+});
+
+export const getProfilePic = selector({
+  key: 'fileLoadableState',
+  get: ({ get }) => {
+    const file = get(profilePic);
+    return file;
+  },
+});
 export interface UserData {
   id: number;
   username: string;
   email: string;
-  pfp: string;
+  pfp: {
+    path : string,
+    link : string
+  }
   friends: {
     id: number;
     username: string;
-    pfp: string;
+    pfp: {
+      path : string,
+      link : string
+    }
     unreadMessageCount: number;
   }[];
   notifications: number;
@@ -52,7 +81,10 @@ export interface UserData {
     user : {
       id: number;
       username: string;
-      pfp: string;
+      pfp: {
+        path : string,
+        link : string
+      }
     }
     createdAt: string;
   }[];
@@ -65,7 +97,10 @@ export const userData = atom<UserData>({
     id : 0,
     username : "",
     email : "",
-    pfp : "",
+    pfp : {
+      path : "",
+      link : ""
+    },
     friends : [],
     notifications : 0,
     pendingRequests : []
