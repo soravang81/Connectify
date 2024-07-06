@@ -5,8 +5,6 @@ import { updateUserDatatype } from "../socket/handlers/userdata"
 import { Sockets } from "../socket/user-socket"
 import dotenv from "dotenv"
 dotenv.config()
-import CryptoJS from 'crypto-js';
-import user from "../routes/user/user"
 
 interface requestProps {
     senderId? : number ,
@@ -55,7 +53,7 @@ export const getUserId = async (socketId : string) : Promise<number | false> =>{
     return socket?.userId!==undefined ? socket.userId : false
 }
 
-export const getKey = async(type :"chat" | "data" ,id1 : number, id2 : number): Promise<string | false>=>{
+export const getKey = async(type :"chat",id1 : number, id2 : number): Promise<string | false>=>{
     const key = `${type}:${id1}:${id2}`;
     const reverseKey = `${type}:${id2}:${id1}`;
     let newKey: string | false;
@@ -64,22 +62,8 @@ export const getKey = async(type :"chat" | "data" ,id1 : number, id2 : number): 
 }
 
 
-
-// export const updateUserData = async (args:updateUserDatatype)=>{
-//     const key = `data:${args.id}`;
-//     const userDataStr= await redis.get(key);
-//     if(typeof userDataStr === 'string'){
-//         const userData: UserData = JSON.parse(userDataStr);
-//         args.keyy === "id" ? userData.id = (args.value as number):
-//         args.keyy === "username" ? userData.username = (args.value as string):
-//         args.keyy === "email" ? userData.email = (args.value as string):
-//         args.keyy === "pfp" ? userData.pfp = (args.value as string):
-//         args.keyy === "notifications" ? userData.notifications = userData.notifications+(args.value as number):null
-//     }
-// }
-export const populateUserData = async (id: number) => {
+export const fetchUserData = async (id: number) => {
     try {
-      // Concurrently fetch user data, profile picture, friend IDs, friends' data, and pending requests
       const [userData, profilePic, friendIds, pendingRequests] = await Promise.all([
         prisma.users.findUnique({ where: { id } }),
         prisma.profilePics.findFirst({ where: { uid: id } }),
@@ -107,10 +91,8 @@ export const populateUserData = async (id: number) => {
         }),
       ]);
   
-      // Extract friend IDs
       const friendIdsArray = friendIds.map(friend => friend.friendId);
   
-      // Fetch friends' data
       const friendsData = await prisma.users.findMany({
         where: { id: { in: friendIdsArray } },
         select: {
@@ -184,15 +166,3 @@ export const getTimeDifference = (time: Date | string): string => {
       return `${Math.floor(minutes / 1440)}d${Math.floor(minutes / 1440) > 1 ? 's' : ''} ago`;
     }
   };
-
-
-export function encrypt(data: string): string {
-    const key = "adhbaja"
-    return CryptoJS.AES.encrypt(data, key).toString();
-}
-
-export function decrypt(ciphertext: string): string {
-    const key = "adhbaja"
-    const bytes = CryptoJS.AES.decrypt(ciphertext, key);
-    return bytes.toString(CryptoJS.enc.Utf8);
-}

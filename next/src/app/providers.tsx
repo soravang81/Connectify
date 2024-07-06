@@ -6,7 +6,7 @@ import { ThemeProvider } from '../utils/theme/theme';
 import { connect } from '../utils/socket/io';
 import { ToastContainer } from 'react-toastify';
 import { Toaster as Toasterr } from '../components/ui/toaster';
-import { Toaster, ToasterProps } from "sonner"
+import { Toaster } from "../components/ui/sonner"
 import { useTheme } from 'next-themes';
 
 

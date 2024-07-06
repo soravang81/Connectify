@@ -52,21 +52,6 @@ user.get("/friends", async (req : Request<{}, {}, {}, props> , res) => {
         };
       });
 
-      const key = `data:${rid}`;
-      console.log(key);
-      const data = await redis.get(key);
-
-      if (data) {
-        try {
-          const userData = JSON.parse(data);
-          userData.friends = friendsData;
-          await redis.set(key, JSON.stringify(userData));
-          console.log("friends set successfully");
-        } catch {
-          console.error("Error setting friends");
-        }
-      }
-
       return res.json({
         friends: friendsData
       });
@@ -90,19 +75,7 @@ user.delete("/friend" , async(req : Request , res : Response)=>{
       }
     });
     if (resp.count > 0) {
-      const key = `data:${sid}`;
-      console.log(key);
-      const data = await redis.get(key);
-      if (data) {
-        try {
-          const userData = JSON.parse(data);
-          userData.friends = userData.friends.filter((friend:any) => friend.id!== fid);
-          await redis.set(key, JSON.stringify(userData));
-          console.log("friends set successfully");
-        } catch {
-          console.log("Error updating redis after deleting friend")
-        }
-      }
+      return res.status(200).send(true)
     }
   }
   catch (e) {

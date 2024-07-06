@@ -48,7 +48,7 @@ export const Profile = ()=> {
                     ...prevUserData,
                     pfp: {
                         path: imageUrl.path,
-                        url: imageUrl.url,
+                        link: imageUrl.url,
                     },
                 }))
                 console.log(imageUrl.url);
@@ -70,7 +70,7 @@ export const Profile = ()=> {
         ...prevUserData,
         pfp: {
             path: imageUrl.path,
-            url : imageUrl.url,
+            link : imageUrl.url,
         },
     }))
       : null
@@ -89,7 +89,7 @@ export const Profile = ()=> {
       toast.error("Error getting profile picture")
     case "hasValue":
       const image = imageState.contents;
-      const fileUrl = image ? URL.createObjectURL(image) : userdata.pfp.url//firestore img;
+      const fileUrl = image ? URL.createObjectURL(image) : userdata.pfp.link//firestore img;
 
       return (
         <Sheet>

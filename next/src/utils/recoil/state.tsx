@@ -43,6 +43,16 @@ export const FriendList = atom<[friends] | []>({
   key: 'FriendList',
   default: []
 });
+export const selectFriends = atom<number[]>({
+  key: 'selectFriends',
+  default: []
+});
+export const getSelectedFriends = selector({
+  key: 'getSelectedFriends',
+  get: ({ get }) => {
+    return get(selectFriends);
+  },
+});
 export const Messages = atom<messagesprop[]>({
   key: "Messages",
   default: []

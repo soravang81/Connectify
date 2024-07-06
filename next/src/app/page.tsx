@@ -1,7 +1,7 @@
 "use client";
 
 import { Container } from "@/src/components/container";
-import Navbar from "../components/navbar";
+import Navbar from "../components/appbar";
 import { FriendsList } from "../components/friends";
 import { useEffect  } from "react";
 import { connect, socket } from "../utils/socket/io";
@@ -9,7 +9,7 @@ import { Messages, UserData, refetchUserData, userData } from "../utils/recoil/s
 import { useRecoilState } from "recoil";
 import { getSession, useSession } from "next-auth/react";
 import { messagesprop, socketmessageprop, statuss } from "../components/chat";
-import { Toaster, toast } from "sonner"
+import { toast } from "sonner"
 
 export default function Home(){
   const [userdata, setUserData] = useRecoilState(userData);
@@ -51,7 +51,6 @@ export default function Home(){
   return (()=>{
     // socket.disconnect()
     socket.off("message")
-    socket.off("UNREAD_MSG")
   })
   },[])
   

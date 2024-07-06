@@ -4,7 +4,7 @@ import { FriendsList } from "@/src/components/friends";
 import { Container } from "@/src/components/container";
 import { ChatSection } from "@/src/components/chat";
 import { getSession, useSession } from "next-auth/react";
-import Navbar from "@/src/components/navbar";
+import Navbar from "@/src/components/appbar";
 import { useEffect, useState } from "react";
 import { connect, socket } from "@/src/utils/socket/io";
 import { useRecoilState } from "recoil";

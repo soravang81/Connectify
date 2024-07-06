@@ -9,7 +9,7 @@ import dotenv from "dotenv"
 import { Bell } from "lucide-react"
 import { Card } from "./ui/card";
 import { socket } from "../utils/socket/io";
-import { FriendRequest } from "./request";
+import { FriendRequest } from "./addFriend";
 import axios from "axios";
 import { Badge } from "./ui/badge";
 import { getTimeDifference } from "../utils/functions/lib";
@@ -17,6 +17,7 @@ import { UserData, notificationFetched, refetchFriends, userData } from "../util
 import { useRecoilState } from "recoil";
 import { string } from "zod";
 import { toast } from "sonner";
+import { CreateGroup } from "./creategroup";
 dotenv.config();
 
 interface props{
@@ -54,8 +55,11 @@ export const Notifications = ()=>{
 
         socket.on("NOTIFICATION" , (data:notification)=>{
             console.log("received notif" , data)
-            toast(
-                `${data.type.toLowerCase().toUpperCase()} ${data.message.toLowerCase().toUpperCase()}`,
+            data.message === "accepted" ? toast.success(
+                `${(data.type.toLowerCase()).toUpperCase()} ${data.message.toLowerCase().toUpperCase()}`,
+            )
+            : toast.error(
+                `${(data.type.toLowerCase()).toUpperCase()} ${data.message.toLowerCase().toUpperCase()}`,
             )
         })      
     },[status])
@@ -145,15 +149,7 @@ export const Notifications = ()=>{
             </PopoverContent>
         </Popover>
         <FriendRequest/>
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button variant={"ghost"} size={"icon"} className="text-sm text-foreground" ><UserGroupIcon height={28}/>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-                
-            </PopoverContent>
-        </Popover>
+        <CreateGroup/>
         </>
     )
 }

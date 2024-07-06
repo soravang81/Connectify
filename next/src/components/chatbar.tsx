@@ -9,6 +9,7 @@ import { DropDownMenu } from "./chatbar-menu";
 
 type status = "ONLINE" | string
 interface props extends React.HTMLAttributes<HTMLDivElement> {}
+
 export const ChatBar:React.FC<props> = ({...props })=>{
     const userdata = useRecoilValueLoadable(userData)
     const friendId = useRecoilValueLoadable<number>(CurrentChatUserId)

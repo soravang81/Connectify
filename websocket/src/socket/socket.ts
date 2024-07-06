@@ -3,7 +3,7 @@ import { getStatusHandler, joinRoomHandler, messageHandler, msgSeenHandler, stat
 import { Sockets, handleDisconnect, removeSocket,userSocket } from "./user-socket";
 import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
-import { getUserId, populateUserData } from "../lib/functions";
+import { getUserId } from "../lib/functions";
 import { getUserData } from "./handlers/userdata";
 import { notificationhandler } from "./handlers/notification";
 
@@ -13,7 +13,6 @@ export const SocketConnections = ()=>{
         console.log("A user connected:", socket.id);
         const id = await getUserId(socket.id)
         console.log(id)
-        populateUserData(id as number)
         // io.sockets.sockets.forEach((socket) => {
         //   socket.disconnect(true); // Send a disconnect message to the client
         // });

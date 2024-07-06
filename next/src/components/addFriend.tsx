@@ -10,6 +10,8 @@ import { useSession } from "next-auth/react"
 import { Check, UserPlus, X } from "lucide-react"
 import { v4 } from "uuid"
 import { socket } from "../utils/socket/io"
+import { response } from "express"
+import { toast } from "sonner"
 dotenv.config();
 
 const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL
@@ -39,8 +41,28 @@ export const FriendRequest = ()=>{
                     roomId : v4()
                 })
             }
-            setStatus(res.data.msg)
-            console.log()
+            switch (res.data.msg) {
+                case "sent":
+                  toast.success("Friend Request sent", { icon: <Check /> });
+                  break;
+                case "already":
+                  toast.error("Friend Request already sent", { icon: <X /> });
+                  break;
+                case "added":
+                  toast.error("User is already your friend", { icon: <X /> });
+                  break;
+                case "notexists":
+                  toast.error("User does not exist", { icon: <X /> });
+                  break;
+                case "self":
+                  toast.error("Cannot send friend request to yourself", { icon: <X /> });
+                  break;
+                case "error":
+                  toast.error("Internal error");
+                  break;
+                default:
+                  break;
+              }
         }
     }
 
@@ -50,16 +72,16 @@ export const FriendRequest = ()=>{
                 <Button variant={"ghost"} size={"icon"} className="text-sm text-foreground" ><UserPlus/>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] ">
                 <DialogHeader>
-                <DialogTitle>Send Friend request</DialogTitle>
-                <DialogDescription>
-                    Enter your friend's username.
+                <DialogTitle className="">Send Friend request</DialogTitle>
+                <DialogDescription >
+                    Enter your friend's email address.
                 </DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col items-start p-2 gap-7">
+                <div className="flex flex-col items-start p-2 gap-4">
                     <Label htmlFor="name" className="text-right">
-                    Name
+                    email
                     </Label>
                     <Input
                     id="name"
@@ -67,13 +89,6 @@ export const FriendRequest = ()=>{
                     className="col-span-3"
                     onChange={(e)=>{handleChange(e)}}
                     />
-                    {/* */}
-                    {status === "sent" && <div className="text-green-500 flex">Friend Request sent <Check /></div>}
-                    {status === "already" && <div className="text-red-400 flex gap-1"><X /> Friend Request already sent </div>}
-                    {status === "added" && <div className="text-red-400 flex gap-1"><X /> User is already a friend of your's </div>}
-                    {status === "notexists" && <div className="text-red-400 flex">User does not exist <X /></div>}
-                    {status === "self" && <div className="text-red-400 flex">Cannot send friend request to yourself <X /></div>}
-                    {status === "error" && <div className="text-red-400 flex">Internal error</div>}
                     <DialogFooter>
                     <Button type="button" onClick={handleSubmit} >Send</Button>
                     </DialogFooter>

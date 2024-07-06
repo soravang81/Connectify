@@ -22,6 +22,9 @@ model Users {
   requests            Requests[]
   friends             Friends[]           @relation("UserFriends")
   friendOf            Friends[]           @relation("FriendUsers")
+  adminOf             GroupAdmin[]
+  memberOf            GroupMembership[]
+  groupMessages       Groupchat[]     
 }
 model Friends {
   id                  Int                 @id @default(autoincrement())
@@ -63,24 +66,43 @@ model Chat {
   time                DateTime
   seen                Boolean             @default(false)
 }
+
 model Group {
   id                  Int                 @id @default(autoincrement())
   name                String
   pfp                 String?
-  members             Int[]
-  admins              Int[]
-  Groupchat           Groupchat[]
+  members             GroupMembership[]   // Relationship to members
+  admins              GroupAdmin[]        // Relationship to admins
+  groupchat           Groupchat[]
 }
+
+model GroupMembership {
+  id                  Int                 @id @default(autoincrement())
+  groupId             Int
+  userId              Int
+  group               Group               @relation(fields: [groupId], references: [id])
+  user                Users               @relation(fields: [userId], references: [id])
+}
+
+model GroupAdmin {
+  id                  Int                 @id @default(autoincrement())
+  groupId             Int
+  userId              Int
+  group               Group               @relation(fields: [groupId], references: [id])
+  user                Users               @relation(fields: [userId], references: [id])
+}
+
 model Groupchat {
   id                  Int                 @id @default(autoincrement())
   groupId             Int                 
   senderId            Int
-  members             Int[]
-  message             Int
+  message             String
   seenBy              Int[]               @default([])
-  time                DateTime
-  group               Group               @relation(fields: [groupId] ,references: [id])
+  time                DateTime            @default(now())
+  group               Group               @relation(fields: [groupId], references: [id])
+  sender              Users               @relation(fields: [senderId], references: [id])
 }
+
 
 
 
