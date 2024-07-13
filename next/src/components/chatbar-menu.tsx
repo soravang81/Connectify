@@ -69,7 +69,7 @@ export function DropDownMenu({friendId}:{friendId : number}) {
         <DropdownMenuTrigger asChild>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="lg:mr-10 md:mr-5 sm:mr-2 p-0 hover:bg-slate-700 focus:border-none focus-visible:border-none flex justify-center items-center"
+            className="lg:mr-7 md:mr-4 sm:mr-2 p-1 hover:bg-slate-700 focus:border-none focus-visible:border-none flex justify-center items-center"
           >
             <Menu size={30} />
           </button>

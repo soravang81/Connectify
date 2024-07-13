@@ -1,6 +1,6 @@
 
 import { Container } from "./container"
-import { FriendsList } from "./friends"
+import { FriendsList } from "./friendsArea"
 import { Button } from "./ui/button"
 
 export const DashBoard = () =>{

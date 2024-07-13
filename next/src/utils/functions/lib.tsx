@@ -76,3 +76,27 @@ export const getUid = async ()=>{
   const session = await getSession();
   return session?.user.id 
 }
+
+export const fetchFid = () => {
+  if (typeof window !== 'undefined') {
+    const currentUrl = window.location.href;
+    const urlParts = currentUrl.split('/');
+    const url = parseInt(urlParts[urlParts.length - 1])
+    // console.log(url)
+    if(Number.isNaN(url)){
+      return urlParts[urlParts.length - 1]
+    }
+    return url
+  }
+};
+export const fetchCurrentUrl = () => {
+  if (typeof window !== 'undefined') {
+    const currentUrl = window.location.href;
+    const urlParts = currentUrl.split('/');
+    const url = parseInt(urlParts[urlParts.length - 1])
+    if(Number.isNaN(url)){
+      return 0
+    }
+    return url
+  }
+};

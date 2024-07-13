@@ -1,5 +1,6 @@
 import { Request, Router } from "express";
 import prisma from "../db/db";
+import * as mediasoup from "mediasoup"
 import { getRequestdetails, getUserdetails } from "./lib/functions";
 import { app, io, startServer, url } from "./server";
 import { SocketConnections } from "./socket/socket";
@@ -31,6 +32,41 @@ app.get("/", (req, res) => {
   console.log(`Frontend URL: ${url}`);
 });
 
+
+
+export let mediasoupWorker:any;
+export let router:any
+
+(async () => {
+  try {
+    mediasoupWorker = await mediasoup.createWorker({
+      rtcMinPort: 10000,
+      rtcMaxPort: 10100,
+    });
+
+    router = await mediasoupWorker.createRouter({
+      mediaCodecs: [
+        {
+          kind: 'audio',
+          mimeType: 'audio/opus',
+          clockRate: 48000,
+          channels: 2,
+        },
+        {
+          kind: 'video',
+          mimeType: 'video/VP8',
+          clockRate: 90000,
+          parameters: {
+            'x-google-start-bitrate': 1000,
+          },
+        },
+      ],
+    });
+  } catch (err) {
+    console.error('Error creating mediasoup worker:', err);
+    process.exit(1);
+  }
+})();
 
 
 

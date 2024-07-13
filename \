@@ -1,0 +1,61 @@
+"use client"
+import { DialogContent, DialogDescription, DialogTrigger } from "./ui/dialog"
+import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { VideoCallBtn } from "./videoCallbtn"
+import { useState } from "react"
+import ReactPlayer from "react-player"
+import { Button } from "./ui/button"
+import { Phone, Video } from "lucide-react"
+import { emitRoomJoin } from "../utils/video/video"
+import { Label } from "./ui/label"
+import { Input } from "./ui/input"
+
+type TcallStatus = "Connecting" | "Connected" | "Disconnected"
+
+export const VideoPopup = ()=>{
+  const [callStatus,setCallStatus] = useState<TcallStatus>("Disconnected")
+  return (
+    <Dialog>
+    <DialogTrigger asChild>
+        <Button onClick={() => handleVideoCall()}
+          className=" p-1 hover:bg-slate-700 focus:border-none focus-visible:border-none flex justify-center items-center">
+          <Video size={30} />
+        </Button>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-96 h-[50rem] w-full">
+      <div className="h-full w-full  flex flex-col justify-between items-center">
+        <DialogTitle>{callStatus}</DialogTitle>
+        my stream
+        <ReactPlayer height={40} width={40}></ReactPlayer>
+        friend stream
+        <ReactPlayer height={40} width={40}></ReactPlayer>
+        <Button type="submit" size={"sm"} className="w-20 self-center"><Phone/></Button>
+      </div>
+    </DialogContent>
+  </Dialog> 
+  )
+}
+
+const handleVideoCall = () => {
+  // toast connecting call
+  console.log("clicked")
+  emitRoomJoin(3)
+  const getStream = () =>{
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+     .then((stream) => {
+        // Create a new PeerConnection instance
+        const pc = new RTCPeerConnection()
+        // pc.a(stream)
+        // Add the stream to the local video element
+        const video = document.getElementById('localVideo') as HTMLVideoElement
+        video.srcObject = stream
+      })
+     .catch((error) => {
+        console.error('Error accessing media devices:', error)
+      })
+  }
+}
+
+
+
+

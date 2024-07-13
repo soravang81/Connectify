@@ -5,7 +5,9 @@ import { sendRequest } from "./handlers";
 import { saveRedisChatToDatabase } from "../redis/redis";
 import { getUserId } from "../lib/functions";
 import { getUserData } from "./handlers/userdata";
+import { router ,  } from "..";
 import { notificationhandler } from "./handlers/notification";
+import { onAnswer, onNegotiation, onNegotiationEnd, onOffer, onVideoEnd } from "./handlers/video";
 
 export const SocketConnections = ()=>{
   console.log("socket server starting..")
@@ -37,10 +39,62 @@ export const SocketConnections = ()=>{
         socket.on('GET_STATUS', (data) => getStatusHandler(socket, data));
 
         socket.on("MSG_SEEN" , (data) => msgSeenHandler(socket, data));
+
+        socket.on("VIDEO_OFFER_OUT" , (data) => onOffer(socket, data));
+
+        socket.on("VIDEO_ANSWER_OUT" , (data) => onAnswer(socket, data));
+
+        socket.on("VIDEO_END" , (data) => onVideoEnd(socket, data));
+
+        socket.on("VIDEO_NEGOTIATION_END" , (data) => onNegotiationEnd(socket, data));
         
-        // socket.on('UNREAD_MSG', (data) => unreadMessage(socket, data));
-        
+        socket.on("VIDEO_NEGOTIATION_OUT" , (data) => onNegotiation(socket, data));
+                
         socket.on('JOIN_ROOM', (data) => joinRoomHandler(socket, data));
         
+        socket.on('startVideoCall', async ({ roomId }) => {
+          try {
+            const transport = await router.createWebRtcTransport({
+              listenIps: ['0.0.0.0'],
+              enableUdp: true,
+              enableTcp: true,
+              preferUdp: true,
+            });
+      
+            socket.emit('roomInfo', {
+              roomId,
+              transportOptions: {
+                id: transport.id,
+                iceParameters: transport.iceParameters,
+                iceCandidates: transport.iceCandidates,
+                dtlsParameters: transport.dtlsParameters,
+              },
+            });
+      
+            transport.on('close', () => {
+              console.log(`Transport closed for roomId=${roomId}`);
+            });
+          } catch (err) {
+            console.error('Error creating WebRTC transport:', err);
+          }
+        });
+      
+        socket.on('connectTransport', async ({ dtlsParameters, roomId }) => {
+          const transport = router.getTransportById(roomId);
+          if (!transport) {
+            console.error(`Transport not found for roomId=${roomId}`);
+            return;
+          }
+          await transport.connect({ dtlsParameters });
+        });
+      
+        socket.on('connectConsumerTransport', async ({ dtlsParameters, roomId }) => {
+          const transport = router.getTransportById(roomId);
+          if (!transport) {
+            console.error(`Transport not found for roomId=${roomId}`);
+            return;
+          }
+          await transport.connect({ dtlsParameters });
+        });
       });
 }

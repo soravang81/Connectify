@@ -69,7 +69,7 @@ model Chat {
 
 model Group {
   id                  Int                 @id @default(autoincrement())
-  name                String
+  name                String              
   pfp                 String              @default("https://firebasestorage.googleapis.com/v0/b/chatapp-4deee.appspot.com/o/ProfilePics%2Fdefault-group.png?alt=media&token=58a2f3df-90c6-4ec8-8552-fa1b41cc77e8")
   members             GroupMembership[]   // Relationship to members
   admins              GroupAdmin[]        // Relationship to admins

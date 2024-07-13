@@ -46,7 +46,11 @@ export const getUserData = async(socket : Socket , data : {id : number})=>{
         const userData = await fetchUserData(data.id)
 
         if(userData){
-            socket.emit("USER_DATA",userData)
+            return userData
+        }
+        else{
+            console.log("User data error")
+            return false
         }
     }
     catch(e){

@@ -1,6 +1,8 @@
-import { fetchCurrentUrl, messagesprop } from '@/src/components/chat';
+// import { fetchCurrentUrl } from '@/src/components/chat';
 import { atom, selector, useSetRecoilState } from 'recoil';
 import { socket } from '../socket/io';
+import { UserData } from '../hooks/userdata';
+import { messagesprop } from '../types/alltypes';
 
 export const friendsFetched = atom({
   key: 'friendsFetched',
@@ -28,7 +30,7 @@ export const isDialog = atom({
 });
 export const CurrentChatUserId = atom<number>({
   key: 'CurrentChatUserId',
-  default : fetchCurrentUrl()
+  default : 0
 });
 interface friends{
   id : number,
@@ -69,53 +71,25 @@ export const getProfilePic = selector({
     return file;
   },
 });
-export interface UserData {
-  id: number;
-  username: string;
-  email: string;
-  pfp: {
-    path : string,
-    link : string
-  }
-  friends: {
-    id: number;
-    username: string;
-    pfp: {
-      path : string,
-      link : string
-    }
-    unreadMessageCount: number;
-  }[];
-  notifications: number;
-  pendingRequests: {
-    user : {
-      id: number;
-      username: string;
-      pfp: {
-        path : string,
-        link : string
-      }
-    }
-    createdAt: string;
-  }[];
-}
+
 export let undreadmsgcount = 0
 
-export const userData = atom<UserData>({
-  key: 'userData',
+export const userDataState = atom<UserData>({
+  key: "userDataState",
   default: {
-    id : 0,
-    username : "",
-    email : "",
-    pfp : {
-      path : "",
-      link : ""
+    id: 0,
+    username: "",
+    email: "",
+    pfp: {
+      path: "",
+      link: "",
     },
-    friends : [],
-    notifications : 0,
-    pendingRequests : []
-  }
-})
+    friends: [],
+    notifications: 0,
+    pendingRequests: [],
+  },
+});
+
 export const refetchFriends = atom({
   key: 'refetchFriends',
   default: false,

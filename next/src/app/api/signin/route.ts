@@ -1,4 +1,3 @@
-import { NextApiRequest } from "next";
 import prisma from "@/db/db";
 import { NextRequest, NextResponse } from "next/server";
 

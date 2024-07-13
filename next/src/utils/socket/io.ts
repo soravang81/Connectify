@@ -1,6 +1,10 @@
 // "use client"
 import { getSession } from 'next-auth/react';
 import { io } from 'socket.io-client';
+import { SocketMessage, messagesprop, socketmessageprop } from '../../utils/types/alltypes';
+import { useRecoilState, useRecoilStateLoadable, useSetRecoilState } from 'recoil';
+import { Messages, userDataState } from '../../utils/recoil/state';
+import { useToast } from '../../components/ui/use-toast';
 
 const socketurl = process.env.NEXT_PUBLIC_SOCKET_URL || "";
 
@@ -19,4 +23,8 @@ export async function connect(){
           socket.connect();
         }
       }
+}
+export const initSocket = ()=>{
+  
+    
 }

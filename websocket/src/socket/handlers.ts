@@ -47,9 +47,8 @@ export const sendRequest = async (socket : Socket , data:requests)=>{
 }
 
 export const statusHandler = async (socket : Socket , data : statuss) =>{
-  const res = await editSocket(data.sid , data.status.status , data.status.id)
+  await editSocket(data.sid , data.status.status , data.status.id)
   console.log(Sockets)
-  // console.log(Sockets)
 }
 
 export const getStatusHandler = async (socket : Socket , data : { sid : number , rid : number}) =>{

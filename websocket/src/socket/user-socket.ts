@@ -39,6 +39,7 @@ export const removeSocket = (id: string | number)=>{
 }
 export const editSocket = async(uid : number , status : status , id? : number ):Promise<boolean> => {
     let resp:boolean = false
+    console.log("status handler : " + uid , id , status)
     Sockets.map((socket)=>{
         if(socket.userId === uid){
             try {

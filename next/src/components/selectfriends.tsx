@@ -15,14 +15,14 @@ import {
   PopoverTrigger,
 } from "../components/ui/popover"
 import { useRecoilState, useRecoilValue } from "recoil"
-import { selectFriends, userData } from "../utils/recoil/state"
+import { selectFriends, userDataState } from "../utils/recoil/state"
 import { Checkbox } from "../components/ui/checkbox"
 import { Label } from "./ui/label"
 
 export function SelectFriends() {
   const [open, setOpen] = React.useState(false)
   const [selectedFriends, setSelectedFriends] = useRecoilState<number[]>(selectFriends)
-  const userdata = useRecoilValue(userData)
+  const userdata = useRecoilValue(userDataState)
   const friends = userdata.friends
 
   const handleSelectFriend = (friendId: number) => {

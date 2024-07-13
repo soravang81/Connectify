@@ -13,11 +13,12 @@ import { FriendRequest } from "./addFriend";
 import axios from "axios";
 import { Badge } from "./ui/badge";
 import { getTimeDifference } from "../utils/functions/lib";
-import { UserData, notificationFetched, refetchFriends, userData } from "../utils/recoil/state";
+import { notificationFetched, refetchFriends, userDataState } from "../utils/recoil/state";
 import { useRecoilState } from "recoil";
 import { string } from "zod";
 import { toast } from "sonner";
 import { CreateGroup } from "./creategroup";
+import { UserData } from "../utils/hooks/userdata";
 dotenv.config();
 
 interface props{
@@ -41,7 +42,7 @@ export const Notifications = ()=>{
     // const [req , setRequests] = useState<props[]>([]);
     const [refetch , setRefetch] = useRecoilState<boolean>(refetchFriends);
     const [notiFetch , setNotiFetch] = useRecoilState<boolean>(notificationFetched);
-    const [userdata , setUserData] = useRecoilState(userData);
+    const [userdata , setUserData] = useRecoilState(userDataState);
 
     useEffect(()=>{
         if(status === "authenticated" && !notiFetch ){
@@ -53,7 +54,7 @@ export const Notifications = ()=>{
         })} 
         console.log("received notif handler" )
 
-        socket.on("NOTIFICATION" , (data:notification)=>{
+        socket.on("NOTIFICATION" , (data:notification)=>{ // receive notification
             console.log("received notif" , data)
             data.message === "accepted" ? toast.success(
                 `${(data.type.toLowerCase()).toUpperCase()} ${data.message.toLowerCase().toUpperCase()}`,
