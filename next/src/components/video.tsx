@@ -38,6 +38,17 @@ export const VideoPopup = ({ id }: { id: number }) => {
       console.error("Error getting media stream:", error);
     }
   }, []);
+  // const getStream = useCallback(async () => {
+  //   try {
+  //     const stream = await navigator.mediaDevices.getUserMedia({
+  //       video: true,
+  //       audio: true,
+  //     });
+  //     setMyStream(stream)
+  //   } catch (error) {
+  //     console.error("Error getting media stream:", error);
+  //   }
+  // }, []);
 
   const handleTrackEvent = useCallback((ev: RTCTrackEvent) => {
     console.log("GOT TRACKS !!: ", ev.streams[0]);
@@ -86,6 +97,7 @@ export const VideoPopup = ({ id }: { id: number }) => {
       action: {
         label: "Accept",
         onClick: async () => {
+          // getStream()
           await sendStream();
           setIsVideoCall(true);
           console.log("received offer", data.offer);
@@ -116,6 +128,7 @@ export const VideoPopup = ({ id }: { id: number }) => {
 
   const handleVideoCall = useCallback(async (sid: number, rid: number) => {
     setIsVideoCall(true);
+    // getStream()
     console.log("clicked");
     const offer = await pc.getOffer();
     console.log("offer:", offer);
@@ -133,12 +146,15 @@ export const VideoPopup = ({ id }: { id: number }) => {
       sid,
       rid : id
     })
+    // Stop all tracks in myStream
     myStream?.getTracks().forEach((track) => track.stop());
+    // Stop all tracks in friendStream
     friendStream?.getTracks().forEach((track) => track.stop());
 
+    // Close the peer connection
     pc.pc?.close();
-    pc.pc = null
 
+    // Reset state
     setMyStream(null);
     setFriendStream(null);
     setIsVideoCall(false);

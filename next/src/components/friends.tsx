@@ -57,7 +57,7 @@ export const Friends = () => {
             className="rounded-2xl border-slate-600 border-2 h-18 flex hover:cursor-pointer"
             onClick={()=>handleCardClick(friend.id)}
           >
-            <img src={userData.pfp.link} alt="img" className="aspect-square size-14 rounded-full p-1" />
+            <img src={friend.pfp.link} alt="img" className="aspect-square size-14 rounded-full p-1" />
             <div className="p-2 w-full">
               <h5 className="font-semibold text-2xl">{friend.username}</h5>
             </div>

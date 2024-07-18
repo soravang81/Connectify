@@ -4,14 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { socket } from "../utils/socket/io";
 import { Container } from "./container";
 import { getSession, useSession } from "next-auth/react";
-import { CurrentChatUserId,Messages,refetchUserData, } from "../utils/recoil/state";
-import { useRecoilState, useRecoilStateLoadable } from "recoil";
+import { CurrentChatUserId } from "../utils/recoil/state";
+import { useRecoilState } from "recoil";
 import { messagesprop, socketmessageprop, statuss } from "../utils/types/alltypes";
 import { MsgSendForm } from "./msgSendBtn";
-import { getUserData } from "../utils/functions/fetchData";
-import useListenMessages from "../utils/hooks/socketsListners";
 import { useChatData } from "../utils/hooks/chat";
-import { emitOnChatStatus } from "../utils/socket/socket";
 
 
 export const ChatSection = ()=>{
